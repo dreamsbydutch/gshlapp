@@ -18,7 +18,8 @@ import updateSearchParams from '../../utils/updateSearchParams'
 
 export function WeeksToggle(props: WeeksTogglePropsType) {
 	const weeks = useWeeksData(props.weekOptions).data
-	const activeWeek = typeof props.activeKey === 'string' ? weeks?.filter(obj => obj.WeekNum === +props.activeKey)[0] : props.activeKey
+	const activeWeek =
+		typeof props.activeKey === 'string' ? weeks?.filter(obj => props.activeKey && obj.WeekNum === +props.activeKey)[0] : props.activeKey
 	return (
 		<>
 			{props.seasonActiveKey && (
@@ -194,7 +195,7 @@ export function PageToolbar(props: PageToolbarPropsType) {
 }
 export function TeamsToggle(props: TeamsTogglePropsType) {
 	const teams = useGSHLTeams(props.teamOptions).data
-	const activeTeam = typeof props.activeKey === 'string' ? teams?.filter(obj => obj.id === +props.activeKey)[0] : props.activeKey
+	const activeTeam = typeof props.activeKey === 'string' ? teams?.filter(obj => props.activeKey && obj.id === +props.activeKey)[0] : props.activeKey
 	return (
 		<>
 			{props.seasonActiveKey && (

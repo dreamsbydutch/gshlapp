@@ -30,7 +30,7 @@ export function useWeeksData (options: WeeksQueryOptions) {
     if (weeks.isLoading) return {'loading':true}
     if (weeks.isError) return {'error':weeks.error}
     if (!weeks.isSuccess) return {'error':weeks}
-    let weeksData: ScheduleWeekType[] = weeks.data.map(obj => formatWeeks(obj)).sort((a,b) => a.id - b.id)
+    let weeksData: ScheduleWeekType[] = weeks.data.map((obj:(number|string)[]) => formatWeeks(obj)).sort((a:ScheduleWeekType,b:ScheduleWeekType) => a.id - b.id)
     if (options.season) {
         weeksData = weeksData.filter(obj => obj.Season === season)
     }

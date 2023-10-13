@@ -2,8 +2,7 @@ import { useRouteError } from 'react-router-dom'
 import MobileNavbar from './components/ui/MobileNavBar'
 
 export default function ErrorPage() {
-	const error = useRouteError()
-	console.error(error)
+	const error: { statusText: string; message: string } = useRouteError() as { statusText: string; message: string }
 
 	return (
 		<div id="error-page">

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { PageToolbar } from './ui/PageNavBar'
 import { SeasonInfoDataType } from '../api/types'
-import { getSeason } from '../utils/utils'
 import { useGSHLTeams } from '../api/queries/teams'
 import { StandingsInfoType, StandingsQueryOptions, useStandingsData } from '../api/queries/standings'
 import { LoadingSpinner } from './ui/LoadingSpinner'
@@ -162,7 +161,7 @@ const StandingsItem = ({ team, season, standingsType }: { team: StandingsInfoTyp
 				<div className="col-span-2 p-1">
 					<img className="w-12" src={String(team.LogoURL)} alt="Team Logo" />
 				</div>
-				<div className="col-span-7 font-bold text-base">{team.TeamName}</div>
+				<div className="col-span-7 font-bold text-base">{teamInfo.data && teamInfo.data[0]?.TeamName}</div>
 				<div className="col-span-2 text-sm">
 					{team.LTW} - {team.LTL}
 				</div>
@@ -231,7 +230,7 @@ const TeamInfo = ({ standingsType }: { standingsType: StandingsOption }) => {
 		case 'Overall':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{[
+					{/* {[
 						'OneSeed',
 						'TwoSeed',
 						'ThreeSeed',
@@ -259,14 +258,14 @@ const TeamInfo = ({ standingsType }: { standingsType: StandingsOption }) => {
 								)}
 							</>
 						)
-					})}
+					})} */}
 				</div>
 			)
 
 		case 'Conference':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{['OneConf', 'TwoConf', 'ThreeConf', 'FourConf', 'FiveConf', 'SixConf', 'SevenConf', 'EightConf'].map((obj, i) => {
+					{/* {['OneConf', 'TwoConf', 'ThreeConf', 'FourConf', 'FiveConf', 'SixConf', 'SevenConf', 'EightConf'].map((obj, i) => {
 						return (
 							<>
 								{teamProb[obj] && (
@@ -277,14 +276,14 @@ const TeamInfo = ({ standingsType }: { standingsType: StandingsOption }) => {
 								)}
 							</>
 						)
-					})}
+					})} */}
 				</div>
 			)
 
-		case 'WC':
+		case 'Wildcard':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{['PlayoffsPer', 'LoserPer', 'SFPer', 'FinalPer', 'CupPer'].map(obj => {
+					{/* {['PlayoffsPer', 'LoserPer', 'SFPer', 'FinalPer', 'CupPer'].map(obj => {
 						return (
 							<>
 								{teamProb[obj] && (
@@ -295,14 +294,14 @@ const TeamInfo = ({ standingsType }: { standingsType: StandingsOption }) => {
 								)}
 							</>
 						)
-					})}
+					})} */}
 				</div>
 			)
 
-		case 'LT':
+		case 'LosersTourney':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{['1stPickPer', '3rdPickPer', '4thPickPer', '8thPickPer'].map(obj => {
+					{/* {['1stPickPer', '3rdPickPer', '4thPickPer', '8thPickPer'].map(obj => {
 						return (
 							<>
 								{teamProb[obj] && (
@@ -313,7 +312,7 @@ const TeamInfo = ({ standingsType }: { standingsType: StandingsOption }) => {
 								)}
 							</>
 						)
-					})}
+					})} */}
 				</div>
 			)
 

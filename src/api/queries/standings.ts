@@ -1,6 +1,6 @@
 import { useQuery } from "react-query";
 import { queryFunc } from "../fetch";
-import { Season, SeasonInfoDataType } from "../types";
+import { SeasonInfoDataType } from "../types";
 import { formatStandings } from "../formatters";
 import { getSeason } from "../../utils/utils";
 
@@ -76,7 +76,7 @@ export function useStandingsData (options: StandingsQueryOptions) {
     if (stdg.isLoading) return {'loading':true}
     if (stdg.isError) return {'error':stdg.error}
     if (!stdg.isSuccess) return {'error':stdg}
-    let stdgData: StandingsInfoType[] = stdg.data.map(obj => formatStandings(obj)).sort((a,b) => a.OvrRk - b.OvrRk)
+    let stdgData: StandingsInfoType[] = stdg.data.map((obj:(number|string)[]) => formatStandings(obj)).sort((a:StandingsInfoType,b:StandingsInfoType) => a.OvrRk - b.OvrRk)
 	console.log(stdgData)
     if (options.season) {
         stdgData = stdgData.filter(obj => obj.Season === season)
