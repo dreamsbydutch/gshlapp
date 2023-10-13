@@ -48,7 +48,7 @@ export function useScheduleData (options: ScheduleQueryOptions) {
     if (sched.isLoading) return {'loading':true}
     if (sched.isError) return {'error':sched.error}
     if (!sched.isSuccess) return {'error':sched}
-    let schedData: MatchupDataType[] = sched.data.map((obj:MatchupDataType) => formatScheduleMatchup(obj))
+    let schedData: MatchupDataType[] = sched.data.map((obj:{[key: string]: string | number | Date | null}) => formatScheduleMatchup(obj))
     if (options.season) {
         schedData = schedData.filter(obj => +obj.Season === season?.Season)
     }

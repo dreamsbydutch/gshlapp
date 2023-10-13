@@ -48,7 +48,7 @@ export function useGSHLTeams (options: TeamsQueryOptions) {
     if (teams.isLoading) return {'loading':true}
     if (teams.isError) return {'error':teams.error}
     if (!teams.isSuccess) return {'error':teams}
-    let teamsData: RawTeamInfoType[] = teams.data.map((obj:(number|string)[]) => formatTeamInfo(obj))
+    let teamsData: RawTeamInfoType[] = teams.data.map((obj:{[key: string]: string | number | Date | null}) => formatTeamInfo(obj))
 	if (options.season) {
 		teamsData = teamsData.filter(obj => options.season && obj[options.season.Season])
 	}

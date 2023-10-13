@@ -76,7 +76,7 @@ export function useStandingsData (options: StandingsQueryOptions) {
     if (stdg.isLoading) return {'loading':true}
     if (stdg.isError) return {'error':stdg.error}
     if (!stdg.isSuccess) return {'error':stdg}
-    let stdgData: StandingsInfoType[] = stdg.data.map((obj:(number|string)[]) => formatStandings(obj)).sort((a:StandingsInfoType,b:StandingsInfoType) => a.OvrRk - b.OvrRk)
+    let stdgData: StandingsInfoType[] = stdg.data.map((obj:{[key: string]: string | number | Date | null}) => formatStandings(obj)).sort((a:StandingsInfoType,b:StandingsInfoType) => a.OvrRk - b.OvrRk)
 	console.log(stdgData)
     if (options.season) {
         stdgData = stdgData.filter(obj => obj.Season === season)
