@@ -39,7 +39,7 @@ export function useContractData (options: ContractQueryOptions) {
     if (contracts.isLoading) return {'loading':true}
     if (contracts.isError) return {'error':contracts.error}
     if (!contracts.isSuccess) return {'error':contracts}
-    let contractData: PlayerContractType[] = contracts.data.map((obj: (number|string)[]) => formatContracts(obj))
+    let contractData: PlayerContractType[] = contracts.data.map((obj: {[key: string]: string | number | Date | null}) => formatContracts(obj))
     if (options.date) {
         contractData = contractData.filter(obj => options.date && obj.CapHitExpiry >= options.date)
     }
