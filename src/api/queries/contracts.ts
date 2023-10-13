@@ -1,6 +1,5 @@
 import { useQuery } from "react-query"
 import { seasonToString } from "../../utils/utils"
-import { SeasonInfoDataType } from "../types"
 import { queryFunc } from "../fetch"
 import { formatContracts } from "../formatters"
 
@@ -40,7 +39,7 @@ export function useContractData (options: ContractQueryOptions) {
     if (contracts.isLoading) return {'loading':true}
     if (contracts.isError) return {'error':contracts.error}
     if (!contracts.isSuccess) return {'error':contracts}
-    let contractData: PlayerContractType[] = contracts.data.map(obj => formatContracts(obj))
+    let contractData: PlayerContractType[] = contracts.data.map((obj: (number|string)[]) => formatContracts(obj))
     if (options.date) {
         contractData = contractData.filter(obj => options.date && obj.CapHitExpiry >= options.date)
     }
