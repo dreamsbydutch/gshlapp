@@ -70,7 +70,8 @@ function WeeklyScheduleContainer(props: {
 	return (
 		<div>
 			<WeeksToggle {...weeksToggleProps} />
-			{matchups.data && matchups.data.map(matchup => <WeekScheduleItem {...{ matchup, season: props.currentSeason }} />)}
+			{matchups.data &&
+				matchups.data.filter(obj => obj.MatchupRtg).map(matchup => <WeekScheduleItem {...{ matchup, season: props.currentSeason }} />)}
 		</div>
 	)
 }

@@ -5,7 +5,7 @@ import { SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
 import { TeamInfoType, useGSHLTeams } from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { getSeason, moneyFormatter } from '../utils/utils'
-import { useContractData } from '../api/queries/contracts'
+import { PlayerContractType, useContractData } from '../api/queries/contracts'
 import updateSearchParams from '../utils/updateSearchParams'
 
 type LockerRoomPagesType = 'Contracts' | 'Player Stats' | 'Team Stats' | 'History'
@@ -84,11 +84,7 @@ export function CapOverview({ paramState }: { paramState: (URLSearchParams | Set
 			contractData.filter(obj => obj.CurrentTeam === a.id).reduce((p, c) => (p += c.CapHit), 0) -
 			contractData.filter(obj => obj.CurrentTeam === b.id).reduce((p, c) => (p += c.CapHit), 0)
 	)
-	function TeamCapSpaceRow({ team }: { team: TeamInfoType }) {
-		const contractData = useContractData({ teamID: team.id, date: new Date() }).data
-		if (!contractData) {
-			return <LoadingSpinner />
-		}
+	function TeamCapSpaceRow({ team, contractData }: { team: TeamInfoType; contractData: PlayerContractType[] }) {
 		return (
 			<tr key={team.id}>
 				<td className="sticky left-0 flex justify-start px-2 py-1 text-sm font-normal text-gray-800 bg-gray-50 whitespace-nowrap">
@@ -103,10 +99,14 @@ export function CapOverview({ paramState }: { paramState: (URLSearchParams | Set
 				</td>
 				{upcomingSeasons[0].PlayoffEndDate > new Date() && (
 					<td className="px-2 py-1 text-xs font-normal text-center text-gray-800 whitespace-nowrap">
-						{moneyFormatter(22500000 - contractData.filter(obj => +obj.YearsRemaining > 0).reduce((prev, curr) => (prev += curr.CapHit), 0))} (
-						{contractData.filter(obj => +obj.YearsRemaining > 0 && obj.ExpiryType !== 'Buyout').length})
+						{moneyFormatter(22500000 - contractData.filter(obj => +obj.YearsRemaining > -1).reduce((prev, curr) => (prev += curr.CapHit), 0))} (
+						{contractData.filter(obj => +obj.YearsRemaining > -1 && obj.ExpiryType !== 'Buyout').length})
 					</td>
 				)}
+				<td className="px-2 py-1 text-xs font-normal text-center text-gray-800 whitespace-nowrap">
+					{moneyFormatter(25000000 - contractData.filter(obj => +obj.YearsRemaining > 0).reduce((prev, curr) => (prev += curr.CapHit), 0))} (
+					{contractData?.filter(obj => +obj.YearsRemaining > 0 && obj.ExpiryType !== 'Buyout').length})
+				</td>
 				<td className="px-2 py-1 text-xs font-normal text-center text-gray-800 whitespace-nowrap">
 					{moneyFormatter(25000000 - contractData.filter(obj => +obj.YearsRemaining > 1).reduce((prev, curr) => (prev += curr.CapHit), 0))} (
 					{contractData?.filter(obj => +obj.YearsRemaining > 1 && obj.ExpiryType !== 'Buyout').length})
@@ -136,11 +136,12 @@ export function CapOverview({ paramState }: { paramState: (URLSearchParams | Set
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[1].ListName}</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[2].ListName}</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[3].ListName}</th>
+							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[4].ListName}</th>
 						</tr>
 					</thead>
 					<tbody>
 						{gshlTeams.map(team => (
-							<TeamCapSpaceRow {...{ team }} />
+							<TeamCapSpaceRow {...{ team, contractData: contractData.filter(obj => obj.CurrentTeam === team.id) }} />
 						))}
 					</tbody>
 				</table>

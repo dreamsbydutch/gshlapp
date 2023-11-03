@@ -3,7 +3,7 @@ import { SeasonInfoDataType } from "./types"
 
 function formatNumbersInsideInputs(inputObj: { [key: string]: (number|string|Date|null) }) {
 	for (const key in inputObj) {
-		if (!isNaN(Number(inputObj[key]))) {
+		if (typeof inputObj[key] !== 'object' && !isNaN(Number(inputObj[key]))) {
 			inputObj[key] = Number(inputObj[key])
 		} else if (inputObj[key] === '') {
 			inputObj[key] = null
@@ -39,4 +39,14 @@ export function formatContracts(contract: { [key: string]: (number|string|Date|n
 	contract.EndDate = contract.EndDate && new Date(contract.EndDate)
 	contract.CapHitExpiry = contract.CapHitExpiry && new Date(contract.CapHitExpiry)
 	return contract
+}
+export function formatPlayerStats(statLine: { [key: string]: (number|string|Date|null) }) {
+	statLine.Date = typeof statLine.Date === 'string' ? new Date(statLine.Date + "T00:00:00") : statLine.Date && new Date(statLine.Date)
+	statLine = formatNumbersInsideInputs(statLine)
+	return statLine
+}
+export function formatTeamStats(statLine: { [key: string]: (number|string|Date|null) }) {
+	statLine.Date = typeof statLine.Date === 'string' ? new Date(statLine.Date + "T00:00:00") : statLine.Date && new Date(statLine.Date)
+	statLine = formatNumbersInsideInputs(statLine)
+	return statLine
 }

@@ -1,8 +1,8 @@
 import { useQuery } from "react-query"
-import { seasonToString } from "../../utils/utils"
-import { SeasonInfoDataType } from "../types"
+import { getSeason, seasonToString } from "../../utils/utils"
+import { Season, SeasonInfoDataType, WeekType } from "../types"
 import { queryFunc } from "../fetch"
-import { formatTeamInfo } from "../formatters"
+import { formatTeamInfo, formatTeamStats } from "../formatters"
 
 
 export type TeamsQueryOptions = {
@@ -62,4 +62,82 @@ export function useGSHLTeams (options: TeamsQueryOptions) {
 		teamsData = teamsData.filter(obj => obj.Conf === options.conf)
     }
     return {data: teamsData as TeamInfoType[]}
+}
+
+
+//
+	type TeamBaseType = {
+		id:number,
+		Season: Season,
+		WeekType: WeekType,
+		gshlTeam:number,
+		owner:number,
+		GP:number,
+		GPg:number,
+		IR:number,
+		'IR+':number,
+		MG:number,
+		GS:number,
+		GSg:number,
+		G:number,
+		A:number,
+		P:number,
+		PPP:number,
+		SOG:number,
+		HIT:number,
+		BLK:number,
+		W:number,
+		GA:number,
+		GAA:number,
+		SV:number,
+		SA:number,
+		SVP:number,
+		TOI:number,
+		MS:number,
+		BS:number,
+		Rating:number,
+	}
+	type TeamDayType = TeamBaseType & {
+		WeekNum:number,
+		Date: Date,
+	}
+	export type TeamWeekType = TeamBaseType & {
+		WeekNum:number,
+		YTDRtg:number,
+		PwrRtg:number,
+		PwrRk:number,
+	}
+	type TeamSeasonType = TeamBaseType & {
+		Players:number,
+		Norris:number,
+		Vezina:number,
+		Calder:number,
+		JackAdams:number,
+		GMOY:number,
+	}
+//
+
+
+
+export type TeamWeekOptions = {
+	season: Season,
+	WeekNum?: number,
+	gshlTeam?: number,
+
+}
+
+export function useTeamWeeks(options: TeamWeekOptions) {
+	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const queryKey = [String(season.Season), 'TeamData', 'Weeks']
+	const weeks = useQuery(queryKey, queryFunc)
+	if (weeks.isLoading) return { loading: true }
+	if (weeks.isError) return { error: weeks.error }
+	if (!weeks.isSuccess) return { error: weeks }
+	let weeksData: TeamWeekType[] = weeks.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatTeamStats(obj))
+		.sort((a: TeamWeekType, b: TeamWeekType) => a.Rating - b.Rating)
+	if (options.season) {weeksData = weeksData.filter(obj => obj.Season === season.Season)}
+	if (options.WeekNum) {weeksData = weeksData.filter(obj => obj.WeekNum === options.WeekNum)}
+	if (options.gshlTeam) {weeksData = weeksData.filter(obj => obj.gshlTeam === options.gshlTeam)}
+	return { data: weeksData }
 }

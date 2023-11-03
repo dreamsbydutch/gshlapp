@@ -13,6 +13,7 @@ import '@fontsource-variable/oswald'
 import '@fontsource/varela-round'
 import '@fontsource/barlow-condensed'
 import LockerRoom from './components/LockerRoom'
+import Matchup from './components/Matchup'
 
 const queryClient = new QueryClient()
 const router = createHashRouter([
@@ -36,6 +37,10 @@ const router = createHashRouter([
 			{
 				path: 'lockerroom',
 				element: <LockerRoom />,
+			},
+			{
+				path: 'matchup/:id',
+				element: <Matchup />,
 			},
 		],
 	},

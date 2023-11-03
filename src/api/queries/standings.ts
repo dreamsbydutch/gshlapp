@@ -24,7 +24,7 @@ export type StandingsInfoType = {
 	gshlTeam: number
 	Owner: number
 	LogoURL: string
-	Conf: string
+	conf: string
 	W: number
 	HW: number
 	HL: number
@@ -77,12 +77,11 @@ export function useStandingsData (options: StandingsQueryOptions) {
     if (stdg.isError) return {'error':stdg.error}
     if (!stdg.isSuccess) return {'error':stdg}
     let stdgData: StandingsInfoType[] = stdg.data.map((obj:{[key: string]: string | number | Date | null}) => formatStandings(obj)).sort((a:StandingsInfoType,b:StandingsInfoType) => a.OvrRk - b.OvrRk)
-	console.log(stdgData)
     if (options.season) {
         stdgData = stdgData.filter(obj => obj.Season === season)
     }
 	if (options.conf) {
-        stdgData = stdgData.filter(obj => obj.Conf === options.conf)
+        stdgData = stdgData.filter(obj => obj.conf === options.conf)
     }
 	if (options.teamID) {
         stdgData = stdgData.filter(obj => +obj.gshlTeam === options.teamID)

@@ -5,6 +5,7 @@ import { Season, SeasonInfoDataType, WeekType } from "../types";
 import { getSeason, seasonToString } from "../../utils/utils";
 
 type ScheduleQueryOptions = {
+	id?: number,
     season?: number | SeasonInfoDataType,
     weekNum?: number,
     gameType?: 'RS'|'CC'|'NC'|'PO'|'QF'|'SF'|'F'|'LT',
@@ -49,8 +50,11 @@ export function useScheduleData (options: ScheduleQueryOptions) {
     if (sched.isError) return {'error':sched.error}
     if (!sched.isSuccess) return {'error':sched}
     let schedData: MatchupDataType[] = sched.data.map((obj:{[key: string]: string | number | Date | null}) => formatScheduleMatchup(obj))
+	if (options.id) {
+        schedData = schedData.filter(obj => obj.id === options.id)
+    }
     if (options.season) {
-        schedData = schedData.filter(obj => +obj.Season === season?.Season)
+        schedData = schedData.filter(obj => obj.Season === season?.Season)
     }
 	if (options.weekNum) {
         schedData = schedData.filter(obj => +obj.WeekNum === options.weekNum)

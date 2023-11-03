@@ -1,7 +1,7 @@
 import clsx, { ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { seasons } from './constants'
-import { SeasonInfoDataType } from '../api/types'
+import { Season, SeasonInfoDataType } from '../api/types'
 
 
 export const cn = (...classes: ClassValue[]) => twMerge(clsx(...classes))
@@ -40,7 +40,7 @@ export function getSeason(season?:number) {
 	return season ? seasons.filter(obj => obj.Season === season)[0] : seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0]
 }
 export function seasonToNumber(season?:SeasonInfoDataType) {
-	return season ? +season.Season : +seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0].Season
+	return season ? +season.Season as Season : +seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0].Season as Season
 }
 export function seasonToString(season?:SeasonInfoDataType) {
 	return season ? String(season.Season) : String(seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0].Season)

@@ -5,7 +5,7 @@ import { useGSHLTeams } from '../api/queries/teams'
 import { StandingsInfoType, StandingsQueryOptions, useStandingsData } from '../api/queries/standings'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import ErrorPage from '../error'
-import { useSearchParams } from 'react-router-dom'
+import { SetURLSearchParams, useSearchParams } from 'react-router-dom'
 import { seasons } from '../utils/constants'
 
 type StandingsOption = 'Overall' | 'Conference' | 'Wildcard' | 'Playoffs' | 'LosersTourney'
@@ -85,7 +85,7 @@ const StandingsToggle = ({ standingsType, season }: { standingsType: StandingsOp
 			{
 				title: "Loser's Tournament",
 				classes: 'bg-brown-100',
-				options: { season, LTRkMax: 4 },
+				options: { season, WCRkMin: 7 },
 			},
 		],
 		Playoffs: [{ title: '', classes: 'bg-gray-100', options: { season } }],
@@ -116,7 +116,6 @@ const StandingsContainer = ({
 	season: SeasonInfoDataType
 	options: StandingsQueryOptions
 }) => {
-	// const teams = useGSHLTeams({ season })
 	const stdg = useStandingsData(options)
 	if (stdg.error) {
 		return <ErrorPage />
