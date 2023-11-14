@@ -7,6 +7,7 @@ import { TeamsTogglePropsType, WeeksTogglePropsType } from '../utils/types'
 import { SeasonInfoDataType } from '../api/types'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { MatchupDataType, useScheduleData } from '../api/queries/schedule'
+import { getSeason, useCurrentWeek } from '../utils/utils'
 
 export default function Schedule() {
 	const [searchParams, setSearchParams] = useSearchParams()
@@ -71,12 +72,21 @@ function WeeklyScheduleContainer(props: {
 		<div>
 			<WeeksToggle {...weeksToggleProps} />
 			{matchups.data &&
-				matchups.data.filter(obj => obj.MatchupRtg).map(matchup => <WeekScheduleItem {...{ matchup, season: props.currentSeason }} />)}
+				props.currentWeek &&
+				matchups.data.map(matchup => <WeekScheduleItem {...{ matchup, season: props.currentSeason, paramState: props.paramState }} />)}
 		</div>
 	)
 }
 
-function WeekScheduleItem({ matchup, season }: { matchup: MatchupDataType; season: SeasonInfoDataType }) {
+function WeekScheduleItem({
+	matchup,
+	season,
+	paramState,
+}: {
+	matchup: MatchupDataType
+	season: SeasonInfoDataType
+	paramState: (URLSearchParams | SetURLSearchParams)[]
+}) {
 	const homeTeamData = useGSHLTeams({ season, teamID: matchup.HomeTeam || undefined }).data
 	const awayTeamData = useGSHLTeams({ season, teamID: matchup.AwayTeam || undefined }).data
 	const homeTeam: TeamInfoType | undefined = homeTeamData && homeTeamData[0]
@@ -131,15 +141,17 @@ function WeekScheduleItem({ matchup, season }: { matchup: MatchupDataType; seaso
 		return <></>
 	}
 	return (
-		<Link className={`grid grid-cols-7 mb-3 py-2 mx-2 items-center shadow-md rounded-xl ${bgClass}`} to={'/matchup/' + matchup.id}>
+		<Link
+			className={`grid grid-cols-7 mb-3 py-1 mx-1 items-center shadow-md rounded-xl ${bgClass}`}
+			to={'/matchup/' + matchup.id + '?' + paramState[0].toString() + '&prev=schedule'}>
 			<div className={'col-span-3 flex flex-col whitespace-nowrap text-center p-2 gap-2 items-center justify-center ' + matchup.HomeWL}>
 				{matchup.AwayRank && +matchup.AwayRank <= 8 && matchup.AwayRank ? (
 					<div className="flex flex-row">
 						<span className="text-sm xs:text-base text-black font-bold font-oswald pr-1">{'#' + matchup.AwayRank}</span>
-						<img className="w-12 xs:w-16" src={awayTeam?.LogoURL} alt="Away Team Logo" />
+						<img className="w-8 xs:w-12" src={awayTeam?.LogoURL} alt="Away Team Logo" />
 					</div>
 				) : (
-					<img className="w-12 xs:w-16" src={awayTeam?.LogoURL} alt="Away Team Logo" />
+					<img className="w-8 xs:w-12" src={awayTeam?.LogoURL} alt="Away Team Logo" />
 				)}
 				<div className={'text-base xs:text-lg font-oswald'}>{awayTeam?.TeamName}</div>
 			</div>
@@ -162,10 +174,10 @@ function WeekScheduleItem({ matchup, season }: { matchup: MatchupDataType; seaso
 				{matchup.HomeRank && +matchup.HomeRank <= 8 && matchup.HomeRank ? (
 					<div className="flex flex-row">
 						<span className="text-sm xs:text-base text-black font-bold font-oswald pr-1">{'#' + matchup.HomeRank}</span>
-						<img className="w-12 xs:w-16" src={homeTeam.LogoURL} alt="Home Team Logo" />
+						<img className="w-8 xs:w-12" src={homeTeam.LogoURL} alt="Home Team Logo" />
 					</div>
 				) : (
-					<img className="w-12 xs:w-16" src={homeTeam.LogoURL} alt="Home Team Logo" />
+					<img className="w-8 xs:w-12" src={homeTeam.LogoURL} alt="Home Team Logo" />
 				)}
 				<div className={'text-base xs:text-lg font-oswald'}>{homeTeam.TeamName}</div>
 			</div>
@@ -198,7 +210,10 @@ function TeamScheduleContainer(props: {
 							<div className="text-xs col-span-2">Score</div>
 						</div>
 						{scheduleData?.map(
-							matchup => props.currentTeam && <TeamScheduleItem {...{ matchup, team: props.currentTeam }} season={props.currentSeason} />
+							matchup =>
+								props.currentTeam && (
+									<TeamScheduleItem {...{ matchup, team: props.currentTeam, season: props.currentSeason, paramState: props.paramState }} />
+								)
 						)}
 					</>
 				)}
@@ -207,8 +222,22 @@ function TeamScheduleContainer(props: {
 	)
 }
 
-function TeamScheduleItem({ matchup, team, season }: { matchup: MatchupDataType; team: TeamInfoType; season: SeasonInfoDataType }) {
+function TeamScheduleItem({
+	matchup,
+	team,
+	season,
+	paramState,
+}: {
+	matchup: MatchupDataType
+	team: TeamInfoType
+	season: SeasonInfoDataType
+	paramState: (URLSearchParams | SetURLSearchParams)[]
+}) {
 	const gshlTeams = useGSHLTeams({ season }).data
+	const currentWeek = useCurrentWeek()
+	if (!currentWeek) {
+		return <LoadingSpinner />
+	}
 	const opponent =
 		matchup.AwayTeam === team.id ? gshlTeams?.filter(obj => obj.id === matchup.HomeTeam)[0] : gshlTeams?.filter(obj => obj.id === matchup.AwayTeam)[0]
 	let output = []
@@ -233,7 +262,7 @@ function TeamScheduleItem({ matchup, team, season }: { matchup: MatchupDataType;
 		return <></>
 	}
 	return (
-		<Link to={'/matchup/' + matchup.id}>
+		<Link to={'/matchup/' + matchup.id + '?' + paramState[0].toString() + '&prev=schedule'}>
 			<div className={`grid grid-cols-9 py-2 border-b ${output[1]}`}>
 				<div className="place-self-center font-varela">{output[0]}</div>
 				<div className="col-span-6 text-base place-self-center font-varela">
@@ -241,7 +270,8 @@ function TeamScheduleItem({ matchup, team, season }: { matchup: MatchupDataType;
 						? '@ ' + (matchup.HomeRank ? '#' + matchup.HomeRank + ' ' : '') + opponent.TeamName
 						: 'v ' + (matchup.AwayRank ? '#' + matchup.AwayRank + ' ' : '') + opponent.TeamName}
 				</div>
-				{(matchup.HomeScore || matchup.AwayScore) && (
+				{((currentWeek.WeekNum && currentWeek.WeekNum >= matchup.WeekNum && currentWeek.Season === getSeason(matchup.Season)) ||
+					currentWeek.Season !== getSeason(matchup.Season)) && (
 					<div
 						className={`text-sm col-span-2 my-auto text-center font-varela ${
 							(matchup.HomeTeam === team.id ? matchup.HomeWL : matchup.AwayWL) === 'W'

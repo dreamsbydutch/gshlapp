@@ -2,7 +2,8 @@ import { useQuery } from "react-query"
 import { getSeason, seasonToString } from "../../utils/utils"
 import { Season, SeasonInfoDataType, WeekType } from "../types"
 import { queryFunc } from "../fetch"
-import { formatTeamInfo, formatTeamStats } from "../formatters"
+import { formatCurrentRoster, formatTeamInfo, formatTeamStats } from "../formatters"
+import { PlayerCurrentRosterType } from "./players"
 
 
 export type TeamsQueryOptions = {
@@ -123,9 +124,7 @@ export type TeamWeekOptions = {
 	season: Season,
 	WeekNum?: number,
 	gshlTeam?: number,
-
 }
-
 export function useTeamWeeks(options: TeamWeekOptions) {
 	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
 	const queryKey = [String(season.Season), 'TeamData', 'Weeks']
@@ -140,4 +139,28 @@ export function useTeamWeeks(options: TeamWeekOptions) {
 	if (options.WeekNum) {weeksData = weeksData.filter(obj => obj.WeekNum === options.WeekNum)}
 	if (options.gshlTeam) {weeksData = weeksData.filter(obj => obj.gshlTeam === options.gshlTeam)}
 	return { data: weeksData }
+}
+
+
+export type CurrentRosterOptions = {
+	season: Season,
+	gshlTeam?: number,
+	nhlTeam?: string,
+	contractEligible?: boolean,
+	lineupPos?: string,
+}
+export function useCurrentRoster(options: CurrentRosterOptions) {
+	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const queryKey = [String(season.Season), 'PlayerData', 'CurrentRosters']
+	const roster = useQuery(queryKey, queryFunc)
+	if (roster.isLoading) return { loading: true }
+	if (roster.isError) return { error: roster.error }
+	if (!roster.isSuccess) return { error: roster }
+	let rosterData: PlayerCurrentRosterType[] = roster.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatCurrentRoster(obj))
+	if (options.gshlTeam) {rosterData = rosterData.filter(obj => options.gshlTeam && obj.gshlTeam.includes(options.gshlTeam))}
+	if (options.nhlTeam) {rosterData = rosterData.filter(obj => obj.nhlTeam && options.nhlTeam && obj.nhlTeam.includes(options.nhlTeam))}
+	if (options.contractEligible) {rosterData = rosterData.filter(obj => obj.ContractEligible)}
+	if (options.lineupPos) {rosterData = rosterData.filter(obj => obj.LineupPos === options.lineupPos)}
+	return { data: rosterData }
 }

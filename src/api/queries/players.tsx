@@ -105,6 +105,62 @@ export type PlayerDraftPickType = {
 export type PlayerAllStarsType = PlayerSeasonType & { LineupPos: string }
 //
 
+type PlayerTotalsOptions = {
+	season: Season
+	id?: number
+	WeekType?: WeekType
+	PlayerName?: string
+	nhlPos?: 'C' | 'C,LW' | 'C,RW' | 'C,LW,RW' | 'LW' | 'LW,RW' | 'RW' | 'D' | 'G'
+	PosGroup?: 'F' | 'D' | 'G'
+	nhlTeam?: string
+	gshlTeam?: number
+	RosterDaysMax?: number
+	RosterDaysMin?: number
+}
+export function usePlayerTotals(options: PlayerTotalsOptions) {
+	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const queryKey = [String(season.Season), 'PlayerData', 'Totals']
+	const totals = useQuery(queryKey, queryFunc)
+	if (totals.isLoading) return { loading: true }
+	if (totals.isError) return { error: totals.error }
+	if (!totals.isSuccess) return { error: totals }
+	let totalsData: PlayerSeasonType[] = totals.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatPlayerStats(obj))
+		.sort((a: PlayerSeasonType, b: PlayerSeasonType) => a.Rating - b.Rating)
+	if (options.season) {
+		totalsData = totalsData.filter(obj => obj.Season === season.Season)
+	}
+	if (options.id) {
+		totalsData = totalsData.filter(obj => obj.id === options.id)
+	}
+	if (options.WeekType) {
+		totalsData = totalsData.filter(obj => obj.WeekType === options.WeekType)
+	}
+	if (options.PlayerName) {
+		totalsData = totalsData.filter(obj => obj.PlayerName === options.PlayerName)
+	}
+	if (options.nhlPos) {
+		totalsData = totalsData.filter(obj => options.nhlPos && obj.nhlPos === options.nhlPos)
+	}
+	if (options.PosGroup) {
+		totalsData = totalsData.filter(obj => obj.PosGroup === options.PosGroup)
+	}
+	if (options.nhlTeam) {
+		totalsData = totalsData.filter(obj => options.nhlTeam && obj.nhlTeam && obj.nhlTeam.includes(options.nhlTeam))
+	}
+	if (options.gshlTeam) {
+		totalsData = totalsData.filter(obj => options.gshlTeam && obj.gshlTeam.includes(options.gshlTeam))
+	}
+	if (options.RosterDaysMax) {
+		totalsData = totalsData.filter(obj => options.RosterDaysMax && obj.RosterDays <= options.RosterDaysMax)
+	}
+	if (options.RosterDaysMin) {
+		totalsData = totalsData.filter(obj => options.RosterDaysMin && obj.RosterDays >= options.RosterDaysMin)
+	}
+	return { data: totalsData }
+}
+
+
 type PlayerWeekOptions = {
 	season: Season
 	id?: number
@@ -131,21 +187,51 @@ export function usePlayerWeeks(options: PlayerWeekOptions) {
 	if (options.season) {
 		weeksData = weeksData.filter(obj => obj.Season === season.Season)
 	}
+	if (options.id) {
+		weeksData = weeksData.filter(obj => obj.id === options.id)
+	}
+	if (options.WeekNum) {
+		weeksData = weeksData.filter(obj => obj.WeekNum === options.WeekNum)
+	}
+	if (options.WeekType) {
+		weeksData = weeksData.filter(obj => obj.WeekType === options.WeekType)
+	}
+	if (options.PlayerName) {
+		weeksData = weeksData.filter(obj => obj.PlayerName === options.PlayerName)
+	}
+	if (options.nhlPos) {
+		weeksData = weeksData.filter(obj => options.nhlPos && obj.nhlPos === options.nhlPos)
+	}
+	if (options.PosGroup) {
+		weeksData = weeksData.filter(obj => obj.PosGroup === options.PosGroup)
+	}
+	if (options.nhlTeam) {
+		weeksData = weeksData.filter(obj => options.nhlTeam && obj.nhlTeam && obj.nhlTeam.includes(options.nhlTeam))
+	}
+	if (options.gshlTeam) {
+		weeksData = weeksData.filter(obj => options.gshlTeam && obj.gshlTeam.includes(options.gshlTeam))
+	}
+	if (options.RosterDaysMax) {
+		weeksData = weeksData.filter(obj => options.RosterDaysMax && obj.RosterDays <= options.RosterDaysMax)
+	}
+	if (options.RosterDaysMin) {
+		weeksData = weeksData.filter(obj => options.RosterDaysMin && obj.RosterDays >= options.RosterDaysMin)
+	}
 	return { data: weeksData }
 }
 
 type PlayerDayOptions = {
 	season: Season
-	id?: number
+	// id?: number
 	Date?: Date
-	WeekNum?: number
-	WeekType?: WeekType
-	PlayerName?: string
-	nhlPos?: 'C' | 'C,LW' | 'C,RW' | 'C,LW,RW' | 'LW' | 'LW,RW' | 'RW' | 'D' | 'G'
-	PosGroup?: 'F' | 'D' | 'G'
-	nhlTeam?: string
-	gshlTeam?: number
-	injury?: 'DTD' | 'O' | 'IR' | 'IR-LT' | 'IR-NR' | 'COVID-19' | 'SUSP' | 'NA' | null
+	// WeekNum?: number
+	// WeekType?: WeekType
+	// PlayerName?: string
+	// nhlPos?: 'C' | 'C,LW' | 'C,RW' | 'C,LW,RW' | 'LW' | 'LW,RW' | 'RW' | 'D' | 'G'
+	// PosGroup?: 'F' | 'D' | 'G'
+	// nhlTeam?: string
+	// gshlTeam?: number
+	// injury?: 'DTD' | 'O' | 'IR' | 'IR-LT' | 'IR-NR' | 'COVID-19' | 'SUSP' | 'NA' | null
 }
 export function usePlayerDays(options: PlayerDayOptions) {
 	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season

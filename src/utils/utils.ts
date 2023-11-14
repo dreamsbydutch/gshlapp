@@ -2,6 +2,7 @@ import clsx, { ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { seasons } from './constants'
 import { Season, SeasonInfoDataType } from '../api/types'
+import { useWeeksData } from '../api/queries/weeks'
 
 
 export const cn = (...classes: ClassValue[]) => twMerge(clsx(...classes))
@@ -51,4 +52,9 @@ export function dateToString(date?:Date|string) {
 		return formatDate(date)
 	}
 	return formatDate(new Date())
+}
+export function useCurrentWeek() {
+	const weeks = useWeeksData({season: getSeason()})
+	const currentWeek = weeks.data?.filter(obj => obj.StartDate <= new Date() && obj.EndDate >= new Date())[0]
+	return currentWeek
 }
