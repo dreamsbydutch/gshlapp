@@ -45,6 +45,11 @@ export default function LockerRoom() {
 						<img className="max-w-xs w-2/6 h-2/6 mx-auto" src={currentTeam.LogoURL} alt="Team Logo" />
 						{currentTeam.TeamName}
 					</div>
+					{lockerRoomPage === null && (
+						<>
+							<TeamRoster {...{ teamInfo: currentTeam, season: getSeason() }} />
+						</>
+					)}
 					{lockerRoomPage === 'Contracts' && (
 						<>
 							<TeamPlayerContracts {...{ teamInfo: currentTeam }} />
