@@ -7,7 +7,6 @@ import { TeamInfoType, TeamWeekType, useCurrentRoster, useGSHLTeams, useTeamWeek
 import { formatDate, getSeason, useCurrentWeek } from '../utils/utils'
 import { BackButton } from './ui/BackButton'
 import { useState } from 'react'
-import { match } from 'assert'
 
 export default function MatchupContainer() {
 	const { id } = useParams()
@@ -835,7 +834,7 @@ function ScrollerItem({
 				</div>
 			) : (
 				<div key={matchup.id} className="flex flex-col m-2 px-1 items-center shadow-emboss rounded-2xl shrink-0 bg-gray-100">
-					<Link to={'/matchup/' + matchup.id}>
+					<Link to={'/matchup/' + matchup.id + '?' + searchParams.toString()}>
 						<div className={`flex p-1 ${matchup.AwayWL === 'W' ? 'font-bold text-emerald-800' : matchup.AwayWL === 'L' ? 'text-rose-800' : ''}`}>
 							{matchup.AwayRank && matchup.AwayRank <= 8 ? (
 								<div className="mx-auto px-1 text-xs xs:text-sm items-start font-bold">#{matchup.AwayRank}</div>

@@ -1,26 +1,22 @@
-import { useParams, useSearchParams } from 'react-router-dom'
-import { useScheduleData } from '../api/queries/schedule'
-import { useStandingsData } from '../api/queries/standings'
+import { useSearchParams } from 'react-router-dom'
 import { CapOverview } from './LockerRoom'
-import { seasonToNumber } from '../utils/utils'
-import { LoadingSpinner } from './ui/LoadingSpinner'
+import { seasonToNumber, useCurrentWeek } from '../utils/utils'
 import { useGSHLTeams } from '../api/queries/teams'
 import { seasons } from '../utils/constants'
 import { usePlayerDays } from '../api/queries/players'
+import MatchupScroller from './ui/MatchupScroller'
 
 function Home() {
-	const z = useSearchParams()
-	const z2 = useParams()
-	const x = useScheduleData({ ownerID: 1, season: 2023, gameType: 'RS' })
-	const y = useStandingsData({ season: 2023 })
-	console.log(x)
-	console.log(y)
-	console.log(z)
-	console.log(z2)
+	const currentWeek = useCurrentWeek()
+	const [searchParams, setSearchParams] = useSearchParams()
+	if (!currentWeek) {
+		return <></>
+	}
 	return (
 		<div>
+			<MatchupScroller {...{ season: currentWeek?.Season.Season, weekNum: currentWeek?.WeekNum, searchParams }} />
 			<MissedStarts />
-			<CapOverview {...{ paramState: z }} />
+			<CapOverview {...{ paramState: [searchParams, setSearchParams] }} />
 		</div>
 	)
 }
@@ -66,8 +62,8 @@ function MissedStarts() {
 	)
 }
 
-function addSuffix(rank) {
-	let suffix
+function addSuffix(rank: number) {
+	let suffix: string
 	if (rank % 100 === 11 || rank % 100 === 12 || rank % 100 === 13) {
 		suffix = 'th'
 	} else if (rank % 10 === 1) {

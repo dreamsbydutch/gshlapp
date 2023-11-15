@@ -35,6 +35,24 @@ export function moneyFormatter(number: number) {
 	})
 	return formatter.format(number).replace('US', '')
 }
+export function isSigningPeriod() {
+	const date = new Date()
+	const season = seasons.slice(-1)[0]
+	switch(true) {
+		case season.EarlySigningStartDate > date:
+			return false
+		case season.EarlySigningStartDate <= date && season.EarlySigningEndDate <= date:
+			return true
+		case season.LateSigningStartDate > date:
+			return false
+		case season.LateSigningStartDate <= date && season.LateSigningEndDate <= date:
+			return true
+		case season.LateSigningEndDate < date:
+			return false
+		default:
+			return false
+	}
+}
 
 
 export function getSeason(season?:number) {

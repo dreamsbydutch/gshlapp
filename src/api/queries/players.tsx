@@ -85,7 +85,7 @@ export type PlayerSalaryType = Omit<PlayerInfoType, 'WeekType' | 'nhlTeam' | 'PP
 	'2025': number | null
 	'2026': number | null
 }
-export type PlayerCurrentRosterType = Omit<PlayerInfoType, 'WeekType' | 'Age' | 'Rating' | 'PPD' | 'MG' | 'GP' | 'GS' | 'MS' | 'BS'> & {
+export type PlayerCurrentRosterType = Omit<PlayerInfoType, 'WeekType' | 'Age' | 'PPD' | 'MG' | 'GP' | 'GS' | 'MS' | 'BS'> & {
 	Rank: number
 	ContractEligible: boolean
 	LineupPos: 'C' | 'LW' | 'RW' | 'D' | 'G' | 'Util' | 'BN' | 'IR+' | 'IR'
@@ -159,7 +159,6 @@ export function usePlayerTotals(options: PlayerTotalsOptions) {
 	}
 	return { data: totalsData }
 }
-
 
 type PlayerWeekOptions = {
 	season: Season

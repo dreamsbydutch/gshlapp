@@ -7,6 +7,8 @@ import { LoadingSpinner } from './ui/LoadingSpinner'
 import { getSeason, moneyFormatter } from '../utils/utils'
 import { PlayerContractType, useContractData } from '../api/queries/contracts'
 import updateSearchParams from '../utils/updateSearchParams'
+import { PlayerCurrentRosterType, PlayerSeasonType } from '../api/queries/players'
+import TeamRoster from './ui/CurrentRoster'
 
 type LockerRoomPagesType = 'Contracts' | 'Player Stats' | 'Team Stats' | 'History'
 
@@ -36,7 +38,6 @@ export default function LockerRoom() {
 	return (
 		<div className="my-4 text-center">
 			<TeamsToggle {...teamsToggleProps} />
-
 			{currentTeam && (
 				<>
 					<SecondaryPageToolbar {...pageToolbarProps} />
@@ -46,9 +47,9 @@ export default function LockerRoom() {
 					</div>
 					{lockerRoomPage === 'Contracts' && (
 						<>
-							{/* <TeamPlayerContracts {...playerStatProps} /> */}
+							<TeamPlayerContracts {...{ teamInfo: currentTeam }} />
 							{/* <TeamDraftPicks {...playerStatProps} /> */}
-							{/* <TeamRoster {...playerStatProps} /> */}
+							<TeamRoster {...{ teamInfo: currentTeam, season: getSeason() }} />
 						</>
 					)}
 					{lockerRoomPage === 'Player Stats' && (
@@ -149,3 +150,140 @@ export function CapOverview({ paramState }: { paramState: (URLSearchParams | Set
 		</>
 	)
 }
+
+function TeamPlayerContracts(props: LockerRoomPlayerStatPropsType) {
+	const currentTeamContracts = useContractData({ teamID: props.teamInfo?.id, date: new Date() }).data
+	if (!currentTeamContracts) {
+		return <LoadingSpinner />
+	}
+	return (
+		<>
+			<div className="mt-4 text-center mx-auto text-xl font-bold">Current Contracts & Buyouts</div>
+			<div className="mb-8 table-auto overflow-scroll no-scrollbar">
+				<PlayerContractTable {...{ contracts: currentTeamContracts, team: props.teamInfo }} />
+			</div>
+		</>
+	)
+}
+function PlayerContractTable(props: { contracts: PlayerContractType[]; team: TeamInfoType | undefined }) {
+	const gshlTeams = useGSHLTeams({ season: getSeason() }).data
+	const PlayerContractRow = (props: { player: PlayerContractType; team: TeamInfoType | undefined }) => (
+		<tr key={props.player.id} className={`${props.player.ExpiryType === 'Buyout' ? 'text-gray-400' : 'text-gray-800'}`}>
+			<td className="sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50">
+				{props.player.PlayerName}
+			</td>
+			<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{props.player.Pos}</td>
+			{props.team == undefined && (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">
+					<img
+						src={gshlTeams?.filter(team => props.player.CurrentTeam === team.id)[0]?.LogoURL || ''}
+						alt={gshlTeams?.filter(team => props.player.CurrentTeam === team.id)[0]?.TeamName || ''}
+						className="h-4 w-4 mx-auto"
+					/>
+				</td>
+			)}
+			{upcomingSeasons[0].PlayoffEndDate > new Date() && +props.player.YearsRemaining > 0 ? (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{moneyFormatter(props.player.CapHit)}</td>
+			) : +props.player.YearsRemaining === 0 ? (
+				<td
+					className={`my-1 mx-2 text-center text-2xs font-bold rounded-xl border-t border-b border-gray-300 ${
+						props.player.ExpiryType === 'RFA' ? 'text-orange-700 bg-orange-100' : props.player.ExpiryType === 'UFA' ? 'text-rose-800 bg-rose-100' : ''
+					}`}>
+					{props.player.ExpiryType === 'Buyout' ? '' : props.player.ExpiryType}
+				</td>
+			) : (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300"></td>
+			)}
+			{+props.player.YearsRemaining > 1 ? (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{moneyFormatter(props.player.CapHit)}</td>
+			) : +props.player.YearsRemaining === 1 ? (
+				<td
+					className={`my-1 mx-2 text-center text-2xs font-bold rounded-xl border-t border-b border-gray-300 ${
+						props.player.ExpiryType === 'RFA' ? 'text-orange-700 bg-orange-100' : props.player.ExpiryType === 'UFA' ? 'text-rose-800 bg-rose-100' : ''
+					}`}>
+					{props.player.ExpiryType === 'Buyout' ? '' : props.player.ExpiryType}
+				</td>
+			) : (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300"></td>
+			)}
+			{+props.player.YearsRemaining > 2 ? (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{moneyFormatter(props.player.CapHit)}</td>
+			) : +props.player.YearsRemaining === 2 ? (
+				<td
+					className={`my-1 mx-2 text-center text-2xs font-bold rounded-xl border-t border-b border-gray-300 ${
+						props.player.ExpiryType === 'RFA' ? 'text-orange-700 bg-orange-100' : props.player.ExpiryType === 'UFA' ? 'text-rose-800 bg-rose-100' : ''
+					}`}>
+					{props.player.ExpiryType === 'Buyout' ? '' : props.player.ExpiryType}
+				</td>
+			) : (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300"></td>
+			)}
+			{+props.player.YearsRemaining > 3 ? (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{moneyFormatter(props.player.CapHit)}</td>
+			) : +props.player.YearsRemaining === 3 ? (
+				<td
+					className={`my-1 mx-2 text-center text-2xs font-bold rounded-xl border-t border-b border-gray-300 ${
+						props.player.ExpiryType === 'RFA' ? 'text-orange-700 bg-orange-100' : props.player.ExpiryType === 'UFA' ? 'text-rose-800 bg-rose-100' : ''
+					}`}>
+					{props.player.ExpiryType === 'Buyout' ? '' : props.player.ExpiryType}
+				</td>
+			) : (
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300"></td>
+			)}
+		</tr>
+	)
+	return (
+		<table className="mx-auto my-1 overflow-x-auto">
+			<thead>
+				<tr key="contractTableHead">
+					<th className="sticky left-0 p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Name</th>
+					<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Pos</th>
+					{!props.team && <th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Team</th>}
+					{upcomingSeasons[0].PlayoffEndDate > new Date() && (
+						<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[0].ListName}</th>
+					)}
+					<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[1].ListName}</th>
+					<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[2].ListName}</th>
+					<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">{upcomingSeasons[3].ListName}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{props.contracts
+					?.sort((a, b) => +b.CapHit - +a.CapHit)
+					.map(obj => (obj ? <PlayerContractRow {...{ player: obj, team: props.team }} /> : <tr></tr>))}
+				{props.team && (
+					<tr key={`${props.team.TeamName}CapSpace`}>
+						<td className="sticky left-0 font-bold py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200">Cap Space</td>
+						<td className="py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200"></td>
+						<td className="py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200">
+							{moneyFormatter(22500000 - props.contracts?.filter(obj => obj.YearsRemaining > 0).reduce((acc, obj) => acc + +obj.CapHit, 0))}
+						</td>
+						<td className="py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200">
+							{moneyFormatter(25000000 - props.contracts?.filter(obj => obj.YearsRemaining > 1).reduce((acc, obj) => acc + +obj.CapHit, 0))}
+						</td>
+						<td className="py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200">
+							{moneyFormatter(25000000 - props.contracts?.filter(obj => obj.YearsRemaining > 2).reduce((acc, obj) => acc + +obj.CapHit, 0))}
+						</td>
+						<td className="py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200">
+							{moneyFormatter(25000000 - props.contracts?.filter(obj => obj.YearsRemaining > 3).reduce((acc, obj) => acc + +obj.CapHit, 0))}
+						</td>
+					</tr>
+				)}
+			</tbody>
+		</table>
+	)
+}
+
+export type LockerRoomPlayerStatPropsType = {
+	teamInfo: TeamInfoType | undefined
+	playerSeasonData?: PlayerSeasonType[]
+	currentRosterData?: PlayerCurrentRosterType[]
+	teamContracts?: PlayerContractType[]
+}
+// export type LockerRoomTeamStatPropsType = {
+// 	teamInfo: TeamInfoType | undefined
+// 	season: SeasonInfoDataType
+// 	teamWeeksData: TeamWeeksType[]
+// 	teamSeasonsData: TeamTotalsType[]
+// 	teamContracts: PlayerContractType[]
+// }
