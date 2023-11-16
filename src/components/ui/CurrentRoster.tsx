@@ -88,7 +88,15 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 													</div>
 													<div
 														className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${
-															a?.Rank < 76 ? 'bg-emerald-200' : a?.Rank < 151 ? 'bg-yellow-200' : a?.Rank < 226 ? 'bg-orange-200' : 'bg-rose-200'
+															a?.Rank < 26
+																? 'bg-emerald-400'
+																: a?.Rank < 76
+																? 'bg-emerald-200'
+																: a?.Rank < 151
+																? 'bg-yellow-200'
+																: a?.Rank < 226
+																? 'bg-orange-200'
+																: 'bg-rose-200'
 														}`}>
 														{Math.round(+a?.Rating * 100) / 100}
 													</div>
@@ -126,7 +134,15 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 										</div>
 										<div
 											className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${
-												obj?.Rank < 76 ? 'bg-emerald-200' : obj?.Rank < 151 ? 'bg-yellow-200' : obj?.Rank < 226 ? 'bg-orange-200' : 'bg-rose-200'
+												obj?.Rank < 26
+													? 'bg-emerald-400'
+													: obj?.Rank < 76
+													? 'bg-emerald-200'
+													: obj?.Rank < 151
+													? 'bg-yellow-200'
+													: obj?.Rank < 226
+													? 'bg-orange-200'
+													: 'bg-rose-200'
 											}`}>
 											{Math.round(+obj?.Rating * 100) / 100}
 										</div>
@@ -140,7 +156,8 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 				</div>
 			) : null}
 			<div className="my-2 flex gap-2 justify-center">
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-200">1 - 75</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-400">1 - 25</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-200">26 - 75</div>
 				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-yellow-200">76 - 150</div>
 				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-orange-200">151 - 225</div>
 				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-rose-200">225 +</div>

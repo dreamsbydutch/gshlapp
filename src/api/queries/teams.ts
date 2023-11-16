@@ -1,9 +1,10 @@
-import { useQuery } from "react-query"
+import { useQueries, useQuery } from "react-query"
 import { getSeason, seasonToString } from "../../utils/utils"
 import { Season, SeasonInfoDataType, WeekType } from "../types"
 import { queryFunc } from "../fetch"
 import { formatCurrentRoster, formatTeamInfo, formatTeamStats } from "../formatters"
 import { PlayerCurrentRosterType } from "./players"
+import { seasons } from "../../utils/constants"
 
 
 export type TeamsQueryOptions = {
@@ -150,7 +151,7 @@ export type CurrentRosterOptions = {
 	lineupPos?: string,
 }
 export function useCurrentRoster(options: CurrentRosterOptions) {
-	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const season: SeasonInfoDataType = getSeason(options.season)
 	const queryKey = [String(season.Season), 'PlayerData', 'CurrentRosters']
 	const roster = useQuery(queryKey, queryFunc)
 	if (roster.isLoading) return { loading: true }
@@ -163,4 +164,35 @@ export function useCurrentRoster(options: CurrentRosterOptions) {
 	if (options.contractEligible) {rosterData = rosterData.filter(obj => obj.ContractEligible)}
 	if (options.lineupPos) {rosterData = rosterData.filter(obj => obj.LineupPos === options.lineupPos)}
 	return { data: rosterData }
+}
+
+
+
+export type TeamDraftPickType = {
+	Season: Season
+	Rd: number
+	Pick: number
+	gshlTeam: number
+	OriginalTeam: number
+}
+export function useAllFutureDraftPicks(team?: TeamInfoType): TeamDraftPickType[] {
+	const statQueries: TeamDraftPickType[] = useQueries(
+		seasons
+			.filter(season => season === getSeason())
+			.map(season => {
+				if (!season.TeamData) return { data: null }
+				const queryKey: string[] = [String(season.Season), 'TeamData', 'DraftPicks']
+				return {
+					queryKey,
+					queryFn: queryFunc,
+				}
+			})
+	)
+		.map(queryResult => {
+			const seasonTeamData: TeamDraftPickType[] = queryResult.data
+			if (team) return seasonTeamData
+			return seasonTeamData
+		})
+		.flat()
+	return statQueries.filter(Boolean)
 }

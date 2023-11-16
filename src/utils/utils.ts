@@ -56,7 +56,7 @@ export function isSigningPeriod() {
 
 
 export function getSeason(season?:number) {
-	return season ? seasons.filter(obj => obj.Season === season)[0] : seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0]
+	return season ? seasons.filter(obj => String(obj.Season) === String(season))[0] : seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0]
 }
 export function seasonToNumber(season?:SeasonInfoDataType) {
 	return season ? +season.Season as Season : +seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0].Season as Season

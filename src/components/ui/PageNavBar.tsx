@@ -10,7 +10,7 @@ import {
 	WeeksTogglePropsType,
 } from '../../utils/types'
 import { SetURLSearchParams } from 'react-router-dom'
-import { SeasonInfoDataType } from '../../api/types'
+import { Season, SeasonInfoDataType } from '../../api/types'
 import { useWeeksData } from '../../api/queries/weeks'
 import { useGSHLTeams } from '../../api/queries/teams'
 import { seasonToString } from '../../utils/utils'
@@ -254,7 +254,15 @@ export function TeamsToggle(props: TeamsTogglePropsType) {
 	)
 }
 
-export function SeasonToggleNavbar({ activeKey, paramState, position }: SeasonTogglePropsType) {
+export function SeasonToggleNavbar({
+	activeKey,
+	paramState,
+	position,
+}: {
+	activeKey: SeasonInfoDataType | string
+	paramState: (URLSearchParams | SetURLSearchParams)[]
+	position?: string[]
+}) {
 	const season: SeasonInfoDataType = typeof activeKey === 'string' ? seasons.filter(szn => szn.Season === +activeKey)[0] : activeKey
 	return (
 		<div className={`z-40 ${position ? position[0] : 'fixed h-10 bg-gray-200 shadow-inv bottom-16 left-0 py-2 px-1'}`}>
@@ -286,6 +294,68 @@ export function SeasonToggleNavbar({ activeKey, paramState, position }: SeasonTo
 												onClick={() => {
 													updateSearchParams(
 														[{ key: 'season', value: String(item.Season) }],
+														paramState[0] as URLSearchParams,
+														paramState[1] as SetURLSearchParams
+													)
+												}}
+												className="-m-4 flex items-center rounded-lg p-2 transition duration-150 ease-in-out hover:bg-gray-50 focus:outline-none focus-visible:ring focus-visible:ring-orange-500 focus-visible:ring-opacity-50">
+												<div className="ml-1">
+													<p className="text-xs font-medium text-gray-800 whitespace-nowrap">{item.ListName}</p>
+												</div>
+											</Popover.Button>
+										))}
+									</div>
+								</div>
+							</Popover.Panel>
+						</Transition>
+					</>
+				)}
+			</Popover>
+		</div>
+	)
+}
+export function SeasonPageToggleNavbar({
+	paramKey,
+	activeKey,
+	paramState,
+	position,
+}: {
+	paramKey: string
+	activeKey: Season
+	paramState: (URLSearchParams | SetURLSearchParams)[]
+	position?: string[]
+}) {
+	const season: SeasonInfoDataType = seasons.filter(szn => szn.Season === +activeKey)[0]
+	return (
+		<div className={`z-40 ${position ? position[0] : 'fixed h-10 bg-gray-200 shadow-inv bottom-16 left-0 py-2 px-1'}`}>
+			<Popover className="">
+				{({ open }) => (
+					<>
+						<Popover.Button
+							className={`inline-flex items-center rounded-lg bg-gray-300 pl-0.5 pr-1.5 py-1 text-2xs font-bold text-gray-900 shadow-emboss`}>
+							<ChevronDownIcon
+								className={`${open ? '' : 'text-opacity-70'} h-4 w-4 text-gray-700 transition duration-150 ease-in-out`}
+								aria-hidden="true"
+							/>
+							<span className="whitespace-nowrap">{season.ListName}</span>
+						</Popover.Button>
+						<Transition
+							as={Fragment}
+							enter="transition ease-out duration-200"
+							enterFrom="opacity-0 translate-y-1"
+							enterTo="opacity-100 translate-y-0"
+							leave="transition ease-in duration-150"
+							leaveFrom="opacity-100 translate-y-0"
+							leaveTo="opacity-0 translate-y-1">
+							<Popover.Panel className={`absolute ${position ? position[1] : 'bottom-12 left-0'} z-10 mt-3 transform px-4 sm:px-0 lg:max-w-3xl`}>
+								<div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
+									<div className="relative grid gap-8 bg-white p-7 lg:grid-cols-2">
+										{seasons.map(item => (
+											<Popover.Button
+												key={item.Season}
+												onClick={() => {
+													updateSearchParams(
+														[{ key: paramKey, value: String(item.Season) }],
 														paramState[0] as URLSearchParams,
 														paramState[1] as SetURLSearchParams
 													)

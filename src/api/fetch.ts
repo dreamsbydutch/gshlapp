@@ -10,7 +10,7 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
 	const [season, statType, pageID] = queryKey
   let queryType: StatTypeType = 'PlayerData'
   let pageName = ''
-  const querySeason = seasons.filter(obj => obj.Season === +season)[0]
+  const querySeason = seasons.filter(obj => String(obj.Season) === season)[0]
   if (statType === 'PlayerData') {
     switch (pageID) {
       case 'Days':
@@ -66,8 +66,10 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
         break;
     }
   }
+  console.log(querySeason.Season)
 	const sheetID = statType === 'MainInput' ? '1jiL1gtJ-_Drlksr24kWaiRABOEniO0pg4Vlm05SFqYM' : querySeason[queryType]
 	console.log('fetching: ' + season + '/' + statType + '/' + pageName)
+  console.log(sheetID)
 	const data = await fetch('https://opensheet.elk.sh/' + sheetID + '/' + pageName)
 	return data.json()
 }

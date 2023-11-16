@@ -118,7 +118,8 @@ type PlayerTotalsOptions = {
 	RosterDaysMin?: number
 }
 export function usePlayerTotals(options: PlayerTotalsOptions) {
-	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const season: SeasonInfoDataType = getSeason(options.season)
+	console.log(season)
 	const queryKey = [String(season.Season), 'PlayerData', 'Totals']
 	const totals = useQuery(queryKey, queryFunc)
 	if (totals.isLoading) return { loading: true }
@@ -249,4 +250,25 @@ export function usePlayerDays(options: PlayerDayOptions) {
 		daysData = daysData.filter(obj => options.Date && formatDate(obj.Date) === formatDate(options.Date))
 	}
 	return { data: daysData }
+}
+
+export function useAllPastDraftPicks(team?: TeamInfoType): PlayerDraftPickType[] {
+	let statQueries: PlayerDraftPickType[] = useQueries(
+		seasons
+			.filter(season => season.SeasonStartDate < new Date())
+			.map(season => {
+				const queryKey: QueryKeyType = [season, 'PlayerData', 'DraftHistory']
+				return {
+					queryKey,
+					queryFn: queryFunc,
+				}
+			})
+	)
+		.map(queryResult => {
+			let seasonPlayerData: PlayerDraftPickType[] = queryResult.data
+			if (team) return seasonPlayerData.filter(player => player.gshlTeam === team[player.Season])
+			return seasonPlayerData
+		})
+		.flat()
+	return statQueries.filter(Boolean)
 }

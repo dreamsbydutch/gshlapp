@@ -19,4 +19,5 @@ export type SeasonInfoDataType = {
 	Categories: string[]
 	PlayerData: string
 	TeamData: string
+	SalaryCap: number
 }
