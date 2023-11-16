@@ -1,7 +1,7 @@
 import { SetURLSearchParams, useSearchParams } from 'react-router-dom'
 import { seasons, upcomingSeasons } from '../utils/constants'
 import { SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../utils/types'
-import { SeasonPageToggleNavbar, SeasonToggleNavbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
+import { SeasonPageToggleNavbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
 import { TeamDraftPickType, TeamInfoType, useAllFutureDraftPicks, useCurrentRoster, useGSHLTeams } from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { getSeason, moneyFormatter } from '../utils/utils'
@@ -9,10 +9,11 @@ import { PlayerContractType, useContractData } from '../api/queries/contracts'
 import updateSearchParams from '../utils/updateSearchParams'
 import { usePlayerTotals } from '../api/queries/players'
 import TeamRoster from './ui/CurrentRoster'
-import { useState } from 'react'
 import { Season } from '../api/types'
+import { useState } from 'react'
+import { useScheduleData } from '../api/queries/schedule'
 
-type LockerRoomPagesType = 'Roster' | 'Contracts' | 'Player Stats' | 'Team Stats' | 'History'
+type LockerRoomPagesType = 'Roster' | 'Contracts' | 'Player Stats' | 'Team Stats' | 'History' | 'Trophy Case'
 
 export default function LockerRoom() {
 	const [searchParams, setSearchParams] = useSearchParams()
@@ -37,9 +38,10 @@ export default function LockerRoom() {
 			{ key: 'pgType', value: 'Contracts' },
 			{ key: 'pgType', value: 'Player Stats' },
 			{ key: 'pgType', value: 'Team Stats' },
+			{ key: 'pgType', value: 'History' },
+			{ key: 'pgType', value: 'Trophy Case' },
 		],
 	}
-	console.log(plyrStatsSeason)
 	return (
 		<div className="my-4 text-center">
 			<TeamsToggle {...teamsToggleProps} />
@@ -72,6 +74,12 @@ export default function LockerRoom() {
 						</>
 					)}
 					{lockerRoomPage === 'Team Stats' && <>{/* <TeamStatChart {...teamStatprops} /> */}</>}
+					{lockerRoomPage === 'History' && (
+						<>
+							<TeamHistoryContainer {...{ teamInfo: currentTeam }} />
+						</>
+					)}
+					{lockerRoomPage === 'Trophy Case' && <>{/* <TeamStatChart {...teamStatprops} /> */}</>}
 					<div className="mb-14 text-white">.</div>
 				</>
 			)}
@@ -447,7 +455,7 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 									<tr key={obj.id}>
 										<td
 											className={`${
-												currentRoster?.filter(a => a.PlayerName === obj.PlayerName).length > 0 ? 'font-bold' : ''
+												currentRoster?.filter(a => a.PlayerName === obj.PlayerName).length > 0 ? 'font-bold' : 'text-gray-500'
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
@@ -578,7 +586,7 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 									<tr key={obj.id}>
 										<td
 											className={`${
-												currentRoster?.filter(a => a.PlayerName === obj.PlayerName).length > 0 ? 'font-bold' : ''
+												currentRoster?.filter(a => a.PlayerName === obj.PlayerName).length > 0 ? 'font-bold' : 'text-gray-500'
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
@@ -709,7 +717,7 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 									<tr key={obj.id}>
 										<td
 											className={`${
-												currentRoster?.filter(a => a.PlayerName === obj.PlayerName).length > 0 ? 'font-bold' : ''
+												currentRoster?.filter(a => a.PlayerName === obj.PlayerName).length > 0 ? 'font-bold' : 'text-gray-500'
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
@@ -746,10 +754,79 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 	)
 }
 
-// export type LockerRoomTeamStatPropsType = {
-// 	teamInfo: TeamInfoType | undefined
-// 	season: SeasonInfoDataType
-// 	teamWeeksData: TeamWeeksType[]
-// 	teamSeasonsData: TeamTotalsType[]
-// 	teamContracts: PlayerContractType[]
-// }
+function TeamHistoryContainer({ teamInfo }: { teamInfo: TeamInfoType }) {
+	const [weekType, setWeekType] = useState()
+	const [gameTypeValue, setGameTypeValue] = useState('')
+	const [seasonValue, setSeasonValue] = useState('')
+	const [opponentValue, setOpponentValue] = useState('')
+
+	// Array of options for the dropdown
+	const gameTypeOptions = [
+		['All', ''],
+		['Regular Season', 'RS'],
+		['Conference', 'CC'],
+		['Non-Conference', 'NC'],
+		['Playoff', 'PO'],
+		['Losers Tourney', 'LT'],
+	]
+	const seasonOptions = [
+		['2022-23', '2023'],
+		['2023-24', '2024'],
+		['All', ''],
+	]
+	const opponentOptions = [['All'], ['Conference'], ['Non-Conference'], ['Playoff'], ['Losers Tourney']]
+
+	const schedule = useScheduleData({ ownerID: teamInfo.OwnerID, season: +seasonValue.split(',')[1], gameType: gameTypeValue.split(',')[1] }).data
+	console.log(schedule)
+	if (!schedule) {
+		return <LoadingSpinner />
+	}
+	return (
+		<>
+			<div className="flex flex-col mx-8">
+				{/* Dropdown */}
+				<select className="border p-2" value={seasonValue} onChange={e => setSeasonValue(e.target.value)}>
+					<option value="" disabled>
+						Select a Season
+					</option>
+					{seasonOptions.map((option, index) => (
+						<option key={index} value={option}>
+							{option[0]}
+						</option>
+					))}
+				</select>
+				{/* Dropdown */}
+				<select className="border p-2" value={gameTypeValue} onChange={e => setGameTypeValue(e.target.value)}>
+					<option value="" disabled>
+						Select a Game Type
+					</option>
+					{gameTypeOptions.map((option, index) => (
+						<option key={index} value={option}>
+							{option[0]}
+						</option>
+					))}
+				</select>
+				{/* Dropdown */}
+				<select className="border p-2" value={opponentValue} onChange={e => setOpponentValue(e.target.value)}>
+					<option value="" disabled>
+						Select an Opponent
+					</option>
+					{opponentOptions.map((option, index) => (
+						<option key={index} value={option}>
+							{option[0]}
+						</option>
+					))}
+				</select>
+			</div>
+			<div className="flex flex-col">
+				{schedule.map(matchup => {
+					return (
+						<div>
+							{matchup.HomeScore} - {matchup.AwayScore}
+						</div>
+					)
+				})}
+			</div>
+		</>
+	)
+}

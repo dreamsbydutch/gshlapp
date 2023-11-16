@@ -27,6 +27,7 @@ export default function Schedule() {
 			{ key: 'schedType', value: 'Team' },
 		],
 	}
+	searchParams.set('prev', 'schedule')
 	return (
 		<div className="my-4 mx-2">
 			<SecondaryPageToolbar {...pageToolbarProps} />
@@ -143,7 +144,7 @@ function WeekScheduleItem({
 	return (
 		<Link
 			className={`grid grid-cols-7 mb-3 py-1 mx-1 items-center shadow-md rounded-xl ${bgClass}`}
-			to={'/matchup/' + matchup.id + '?' + paramState[0].toString() + '&prev=schedule'}>
+			to={'/matchup/' + matchup.id + '?' + paramState[0].toString()}>
 			<div className={'col-span-3 flex flex-col whitespace-nowrap text-center p-2 gap-2 items-center justify-center ' + matchup.HomeWL}>
 				{matchup.AwayRank && +matchup.AwayRank <= 8 && matchup.AwayRank ? (
 					<div className="flex flex-row">
@@ -262,7 +263,7 @@ function TeamScheduleItem({
 		return <></>
 	}
 	return (
-		<Link to={'/matchup/' + matchup.id + '?' + paramState[0].toString() + '&prev=schedule'}>
+		<Link to={'/matchup/' + matchup.id + '?' + paramState[0].toString()}>
 			<div className={`grid grid-cols-9 py-2 border-b ${output[1]}`}>
 				<div className="place-self-center font-varela">{output[0]}</div>
 				<div className="col-span-6 text-base place-self-center font-varela">

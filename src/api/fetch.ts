@@ -66,10 +66,8 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
         break;
     }
   }
-  console.log(querySeason.Season)
 	const sheetID = statType === 'MainInput' ? '1jiL1gtJ-_Drlksr24kWaiRABOEniO0pg4Vlm05SFqYM' : querySeason[queryType]
 	console.log('fetching: ' + season + '/' + statType + '/' + pageName)
-  console.log(sheetID)
 	const data = await fetch('https://opensheet.elk.sh/' + sheetID + '/' + pageName)
 	return data.json()
 }

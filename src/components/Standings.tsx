@@ -5,7 +5,7 @@ import { useGSHLTeams } from '../api/queries/teams'
 import { StandingsInfoType, StandingsQueryOptions, useStandingsData } from '../api/queries/standings'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import ErrorPage from '../error'
-import { SetURLSearchParams, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { seasons } from '../utils/constants'
 
 type StandingsOption = 'Overall' | 'Conference' | 'Wildcard' | 'Playoffs' | 'LosersTourney'

@@ -151,7 +151,7 @@ export function WeeksToggle(props: WeeksTogglePropsType) {
 export function PageToolbar(props: PageToolbarPropsType) {
 	return (
 		<>
-			{props.activeKey && (
+			{props.seasonActiveKey && (
 				<SeasonToggleNavbar
 					{...{
 						activeKey: props.seasonActiveKey || seasonToString(),
@@ -178,7 +178,7 @@ export function PageToolbar(props: PageToolbarPropsType) {
                           `}
 									onClick={() =>
 										updateSearchParams(
-											[{ key: 'stdgType', value: toolbarKey.value }],
+											[{ key: toolbarKey.key, value: toolbarKey.value }],
 											props.paramState[0] as URLSearchParams,
 											props.paramState[1] as SetURLSearchParams
 										)

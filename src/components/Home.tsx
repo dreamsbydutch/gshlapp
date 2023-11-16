@@ -14,7 +14,7 @@ function Home() {
 	}
 	return (
 		<div>
-			<MatchupScroller {...{ season: currentWeek?.Season.Season, weekNum: currentWeek?.WeekNum, searchParams }} />
+			<MatchupScroller {...{ season: currentWeek?.Season.Season, weekNum: currentWeek?.WeekNum, searchParams, prev: 'home' }} />
 			<MissedStarts />
 			<CapOverview {...{ paramState: [searchParams, setSearchParams] }} />
 		</div>

@@ -8,11 +8,13 @@ export default function MatchupScroller({
 	weekNum,
 	currentID,
 	searchParams,
+	prev,
 }: {
 	season: number
 	weekNum: number
 	currentID?: number
 	searchParams: URLSearchParams
+	prev: string
 }) {
 	const weeklyMatchups = useScheduleData({ season, weekNum })
 	const pastMatchups = useScheduleData({ season, weekNum: weekNum - 1 })
@@ -28,7 +30,7 @@ export default function MatchupScroller({
 					{weeklyMatchups.data
 						.sort((a, b) => a.MatchupNum - b.MatchupNum)
 						.map(matchup => (
-							<ScrollerItem {...{ matchup, teams: teams.data, currentID: currentID || 0, searchParams }} />
+							<ScrollerItem {...{ matchup, teams: teams.data, currentID: currentID || 0, searchParams, prev }} />
 						))}
 				</div>
 			</div>
@@ -39,7 +41,7 @@ export default function MatchupScroller({
 					{pastMatchups.data
 						.sort((a, b) => a.MatchupNum - b.MatchupNum)
 						.map(matchup => (
-							<ScrollerItem {...{ matchup, teams: teams.data, currentID: currentID || 0, searchParams }} />
+							<ScrollerItem {...{ matchup, teams: teams.data, currentID: currentID || 0, searchParams, prev }} />
 						))}
 				</div>
 			</div>
@@ -51,14 +53,17 @@ function ScrollerItem({
 	teams,
 	currentID,
 	searchParams,
+	prev,
 }: {
 	matchup: MatchupDataType
 	teams: TeamInfoType[]
 	currentID: number
 	searchParams: URLSearchParams
+	prev: string
 }) {
 	const homeTeam = teams.filter(obj => obj.id === matchup.HomeTeam)[0]
 	const awayTeam = teams.filter(obj => obj.id === matchup.AwayTeam)[0]
+	searchParams.set('prev',prev)
 	return (
 		<>
 			{currentID === matchup.id ? (

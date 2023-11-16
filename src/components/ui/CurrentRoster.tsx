@@ -88,13 +88,13 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 													</div>
 													<div
 														className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${
-															a?.Rank < 26
+															a?.Rank < 17
 																? 'bg-emerald-400'
-																: a?.Rank < 76
+																: a?.Rank < 65
 																? 'bg-emerald-200'
-																: a?.Rank < 151
+																: a?.Rank < 161
 																? 'bg-yellow-200'
-																: a?.Rank < 226
+																: a?.Rank < 241
 																? 'bg-orange-200'
 																: 'bg-rose-200'
 														}`}>
@@ -134,13 +134,13 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 										</div>
 										<div
 											className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${
-												obj?.Rank < 26
+												obj?.Rank < 17
 													? 'bg-emerald-400'
-													: obj?.Rank < 76
+													: obj?.Rank < 65
 													? 'bg-emerald-200'
-													: obj?.Rank < 151
+													: obj?.Rank < 161
 													? 'bg-yellow-200'
-													: obj?.Rank < 226
+													: obj?.Rank < 241
 													? 'bg-orange-200'
 													: 'bg-rose-200'
 											}`}>
@@ -156,11 +156,11 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 				</div>
 			) : null}
 			<div className="my-2 flex gap-2 justify-center">
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-400">1 - 25</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-200">26 - 75</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-yellow-200">76 - 150</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-orange-200">151 - 225</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-rose-200">225 +</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-400">1 - 16</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-200">17 - 64</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-yellow-200">65 - 160</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-orange-200">161 - 240</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-rose-200">241 +</div>
 			</div>
 		</>
 	)

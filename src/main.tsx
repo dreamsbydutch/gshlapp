@@ -14,6 +14,7 @@ import '@fontsource/varela-round'
 import '@fontsource/barlow-condensed'
 import LockerRoom from './components/LockerRoom'
 import Matchup from './components/Matchup'
+import LeagueOffice from './components/LeagueOffice'
 
 const queryClient = new QueryClient()
 const router = createHashRouter([
@@ -27,6 +28,10 @@ const router = createHashRouter([
 				element: <Home />,
 			},
 			{
+				path: 'home',
+				element: <Home />,
+			},
+			{
 				path: 'schedule',
 				element: <Schedule />,
 			},
@@ -37,6 +42,10 @@ const router = createHashRouter([
 			{
 				path: 'lockerroom',
 				element: <LockerRoom />,
+			},
+			{
+				path: 'leagueOffice',
+				element: <LeagueOffice />,
 			},
 			{
 				path: 'matchup/:id',

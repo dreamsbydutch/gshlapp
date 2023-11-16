@@ -13,7 +13,6 @@ export default function MatchupContainer() {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const schedData = useScheduleData({ id: Number(id) })
 	if (!schedData.data) return <LoadingSpinner />
-	console.log(schedData.data[0])
 	return <Matchup paramState={[searchParams, setSearchParams]} matchup={schedData.data[0]} />
 }
 
