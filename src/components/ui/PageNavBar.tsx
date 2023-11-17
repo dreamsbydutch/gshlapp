@@ -214,40 +214,43 @@ export function TeamsToggle(props: TeamsTogglePropsType) {
 						: 'h-10 w-min max-w-full px-2 bg-gray-200 shadow-inv fixed left-0 right-0 mx-auto bottom-16 z-30'
 				}>
 				<div className="h-10 flex gap-0.5 items-center mx-auto overflow-x-scroll no-scrollbar">
-					{teams?.map((team, i) => {
-						return (
-							<>
-								{i !== 0 && <span key={'split-' + i} className="h-4/6 border-1 border-gray-400" />}
-								{activeTeam === team ? (
-									<div
-										key={team.id}
-										className={`rounded-md ${team.Conf === 'SV' ? 'bg-sunview-700' : 'bg-hotel-700'}`}
-										onClick={() =>
-											updateSearchParams(
-												[{ key: 'teamID', value: '' }],
-												props.paramState[0] as URLSearchParams,
-												props.paramState[1] as SetURLSearchParams
-											)
-										}>
-										<img className="p-1.5 rounded-lg max-w-max h-10" src={team.LogoURL} alt={team.TeamName} />
-									</div>
-								) : (
-									<div
-										key={team.id}
-										className={`rounded-md bg-gray-200`}
-										onClick={() =>
-											updateSearchParams(
-												[{ key: 'teamID', value: String(team.id) }],
-												props.paramState[0] as URLSearchParams,
-												props.paramState[1] as SetURLSearchParams
-											)
-										}>
-										<img className="p-1.5 rounded-lg max-w-max h-10" src={team.LogoURL} alt={team.TeamName} />
-									</div>
-								)}
-							</>
-						)
-					})}
+					{teams
+						?.sort((a, b) => a.TeamName.localeCompare(b.TeamName))
+						.sort((a, b) => b.Conf.localeCompare(a.Conf))
+						.map((team, i) => {
+							return (
+								<>
+									{i !== 0 && <span key={'split-' + i} className="h-4/6 border-1 border-gray-400" />}
+									{activeTeam === team ? (
+										<div
+											key={team.id}
+											className={`rounded-md ${team.Conf === 'SV' ? 'bg-sunview-700' : 'bg-hotel-700'}`}
+											onClick={() =>
+												updateSearchParams(
+													[{ key: 'teamID', value: '' }],
+													props.paramState[0] as URLSearchParams,
+													props.paramState[1] as SetURLSearchParams
+												)
+											}>
+											<img className="p-1.5 rounded-lg max-w-max h-10" src={team.LogoURL} alt={team.TeamName} />
+										</div>
+									) : (
+										<div
+											key={team.id}
+											className={`rounded-md bg-gray-200`}
+											onClick={() =>
+												updateSearchParams(
+													[{ key: 'teamID', value: String(team.id) }],
+													props.paramState[0] as URLSearchParams,
+													props.paramState[1] as SetURLSearchParams
+												)
+											}>
+											<img className="p-1.5 rounded-lg max-w-max h-10" src={team.LogoURL} alt={team.TeamName} />
+										</div>
+									)}
+								</>
+							)
+						})}
 				</div>
 			</div>
 		</>

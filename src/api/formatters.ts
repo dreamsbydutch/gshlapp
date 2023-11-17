@@ -27,6 +27,9 @@ export function formatStandings(stdg: { [key: string]: (number|string|string[]|n
 export function formatTeamInfo(team: { [key: string]: (number|string|string[]|number[]|Date|null) }) {
 	return formatNumbersInsideInputs(team)
 }
+export function formatOwnerInfo(team: { [key: string]: (number|string|string[]|number[]|Date|null) }) {
+	return formatNumbersInsideInputs(team)
+}
 export function formatWeeks(week: { [key: string]: (number|string|string[]|number[]|Date|SeasonInfoDataType|null) }) {
 	week.Season = week.Season&&isNaN(+week.Season) ? week.Season : seasons.filter(obj => week.Season && obj.Season === +week.Season)[0]
 	week = formatNumbersInsideInputs(week as { [key: string]: (number|string|Date|null) })

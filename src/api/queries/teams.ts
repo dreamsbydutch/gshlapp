@@ -2,7 +2,7 @@ import { useQueries, useQuery } from "react-query"
 import { getSeason, seasonToString } from "../../utils/utils"
 import { Season, SeasonInfoDataType, WeekType } from "../types"
 import { queryFunc } from "../fetch"
-import { formatCurrentRoster, formatTeamInfo, formatTeamStats } from "../formatters"
+import { formatCurrentRoster, formatOwnerInfo, formatTeamInfo, formatTeamStats } from "../formatters"
 import { PlayerCurrentRosterType } from "./players"
 import { seasons } from "../../utils/constants"
 
@@ -17,7 +17,7 @@ export type TeamsQueryOptions = {
 export type TeamInfoType = {
 	id: number
 	TeamName: string
-	OwnerID: number
+	Owner: OwnerInfoType
 	LogoURL: string
 	Conf: string
 }
@@ -42,15 +42,31 @@ export type RawTeamInfoType = {
 	'2026': number | undefined
 	'2027': number | undefined
 }
+export type OwnerInfoType = {
+	id:number
+	FirstName:string
+	Nickname:string
+	LastName:string
+	Email:string
+	Draft21:string
+	Meetings21:string
+	Draft22:string
+	Meetings22:string
+	Draft23:string
+	Meetings23:string
+}
 
 export function useGSHLTeams (options: TeamsQueryOptions) {
     const queryKey = [seasonToString(options.season), 'MainInput', 'GSHLTeams']
+    const queryKey2 = [seasonToString(options.season), 'MainInput', 'Users']
 	// NEED TO GET CONTRACT DATA TO CALC CAP SPACE
 	const teams = useQuery(queryKey,queryFunc)
-    if (teams.isLoading) return {'loading':true}
-    if (teams.isError) return {'error':teams.error}
-    if (!teams.isSuccess) return {'error':teams}
+	const owners = useQuery(queryKey2,queryFunc)
+    if (teams.isLoading || owners.isLoading) return {'loading':true}
+    if (teams.isError || owners.isError) return {'error':teams.error}
+    if (!teams.isSuccess || !owners.isSuccess) return {'error':teams}
     let teamsData: RawTeamInfoType[] = teams.data.map((obj:{[key: string]: string | number | Date | null}) => formatTeamInfo(obj))
+    const ownersData: OwnerInfoType[] = owners.data.map((obj:{[key: string]: string | number | Date | null}) => formatOwnerInfo(obj))
 	if (options.season) {
 		teamsData = teamsData.filter(obj => options.season && obj[options.season.Season])
 	}
@@ -63,7 +79,12 @@ export function useGSHLTeams (options: TeamsQueryOptions) {
 	if (options.conf) {
 		teamsData = teamsData.filter(obj => obj.Conf === options.conf)
     }
-    return {data: teamsData as TeamInfoType[]}
+	const output: TeamInfoType[] = teamsData.map(obj => {
+		return {...obj,
+			Owner: ownersData.filter(a => a.id === obj.OwnerID)[0]
+		}
+	})
+    return {data: output}
 }
 
 

@@ -1,4 +1,4 @@
-import { SetURLSearchParams, useSearchParams } from 'react-router-dom'
+import { Link, SetURLSearchParams, useSearchParams } from 'react-router-dom'
 import { seasons, upcomingSeasons } from '../utils/constants'
 import { SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../utils/types'
 import { SeasonPageToggleNavbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
@@ -11,7 +11,7 @@ import { usePlayerTotals } from '../api/queries/players'
 import TeamRoster from './ui/CurrentRoster'
 import { Season } from '../api/types'
 import { useState } from 'react'
-import { useScheduleData } from '../api/queries/schedule'
+import { MatchupDataType, useScheduleData } from '../api/queries/schedule'
 
 type LockerRoomPagesType = 'Roster' | 'Contracts' | 'Player Stats' | 'Team Stats' | 'History' | 'Trophy Case'
 
@@ -76,7 +76,7 @@ export default function LockerRoom() {
 					{lockerRoomPage === 'Team Stats' && <>{/* <TeamStatChart {...teamStatprops} /> */}</>}
 					{lockerRoomPage === 'History' && (
 						<>
-							<TeamHistoryContainer {...{ teamInfo: currentTeam }} />
+							<TeamHistoryContainer {...{ teamInfo: currentTeam, paramState: [searchParams, setSearchParams] }} />
 						</>
 					)}
 					{lockerRoomPage === 'Trophy Case' && <>{/* <TeamStatChart {...teamStatprops} /> */}</>}
@@ -754,11 +754,15 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 	)
 }
 
-function TeamHistoryContainer({ teamInfo }: { teamInfo: TeamInfoType }) {
-	const [weekType, setWeekType] = useState()
+function TeamHistoryContainer({ teamInfo, paramState }: { teamInfo: TeamInfoType; paramState: (URLSearchParams | SetURLSearchParams)[] }) {
+	const fullSchedule = useScheduleData({
+		ownerID: teamInfo.Owner.id,
+	}).data
 	const [gameTypeValue, setGameTypeValue] = useState('')
 	const [seasonValue, setSeasonValue] = useState('')
+	const [ownerValue, setOwnerValue] = useState('')
 	const [opponentValue, setOpponentValue] = useState('')
+	const teams = useGSHLTeams({}).data
 
 	// Array of options for the dropdown
 	const gameTypeOptions = [
@@ -774,16 +778,46 @@ function TeamHistoryContainer({ teamInfo }: { teamInfo: TeamInfoType }) {
 		['2023-24', '2024'],
 		['All', ''],
 	]
-	const opponentOptions = [['All'], ['Conference'], ['Non-Conference'], ['Playoff'], ['Losers Tourney']]
-
-	const schedule = useScheduleData({ ownerID: teamInfo.OwnerID, season: +seasonValue.split(',')[1], gameType: gameTypeValue.split(',')[1] }).data
-	console.log(schedule)
-	if (!schedule) {
+	const gameType =
+		gameTypeValue.split(',')[1] === '' ? undefined : (gameTypeValue.split(',')[1] as 'RS' | 'CC' | 'NC' | 'PO' | 'QF' | 'SF' | 'F' | 'LT')
+	const schedule = useScheduleData({
+		ownerID: teamInfo.Owner.id,
+		season: +seasonValue.split(',')[1],
+		gameType,
+		oppOwnerID: +ownerValue.split(',')[1],
+		opponentID: +opponentValue.split(',')[1],
+	}).data
+	if (!schedule || !teams || !fullSchedule) {
 		return <LoadingSpinner />
 	}
+	const opponentOptions: string[][] = [
+		['All', ''],
+		...removeDuplicates(
+			fullSchedule.map(matchup => {
+				const opp =
+					teamInfo.id === matchup.HomeTeam
+						? teams.filter(team => team.id === matchup.AwayTeam)[0]
+						: teams.filter(team => team.id === matchup.HomeTeam)[0]
+				return [opp.TeamName, String(opp.id)]
+			})
+		).sort((a, b) => a[0].localeCompare(b[0])),
+	]
+	const ownerOptions: string[][] = [
+		['All', ''],
+		...removeDuplicates(
+			fullSchedule.map(matchup => {
+				const opp =
+					teamInfo.id === matchup.HomeTeam
+						? teams.filter(team => team.id === matchup.AwayTeam)[0]
+						: teams.filter(team => team.id === matchup.HomeTeam)[0]
+				return [opp.Owner.Nickname, String(opp.Owner.id)]
+			})
+		).sort((a, b) => a[0].localeCompare(b[0])),
+	]
+
 	return (
 		<>
-			<div className="flex flex-col mx-8">
+			<div className="flex flex-col gap-1 mx-20">
 				{/* Dropdown */}
 				<select className="border p-2" value={seasonValue} onChange={e => setSeasonValue(e.target.value)}>
 					<option value="" disabled>
@@ -807,7 +841,30 @@ function TeamHistoryContainer({ teamInfo }: { teamInfo: TeamInfoType }) {
 					))}
 				</select>
 				{/* Dropdown */}
-				<select className="border p-2" value={opponentValue} onChange={e => setOpponentValue(e.target.value)}>
+				<select
+					className="border p-2"
+					value={ownerValue}
+					onChange={e => {
+						setOwnerValue(e.target.value)
+						setOpponentValue('')
+					}}>
+					<option value="" disabled>
+						Select an Owner
+					</option>
+					{ownerOptions.map((option, index) => (
+						<option key={index} value={option}>
+							{option[0]}
+						</option>
+					))}
+				</select>
+				{/* Dropdown */}
+				<select
+					className="border p-2"
+					value={opponentValue}
+					onChange={e => {
+						setOpponentValue(e.target.value)
+						setOwnerValue('')
+					}}>
 					<option value="" disabled>
 						Select an Opponent
 					</option>
@@ -818,15 +875,101 @@ function TeamHistoryContainer({ teamInfo }: { teamInfo: TeamInfoType }) {
 					))}
 				</select>
 			</div>
-			<div className="flex flex-col">
+			<div className="flex flex-col gap-2 mx-2 my-8">
 				{schedule.map(matchup => {
-					return (
-						<div>
-							{matchup.HomeScore} - {matchup.AwayScore}
-						</div>
-					)
+					return <TeamHistoryMatchupLine {...{ matchup, teams, teamInfo, paramState }} />
 				})}
 			</div>
+		</>
+	)
+	function removeDuplicates(arr: string[][]): string[][] {
+		const uniqueItems = new Set<string>()
+
+		return arr.filter(item => {
+			const key = item.join('|')
+			return uniqueItems.has(key) ? false : (uniqueItems.add(key), true)
+		})
+	}
+}
+
+function TeamHistoryMatchupLine({
+	matchup,
+	teams,
+	teamInfo,
+	paramState,
+}: {
+	matchup: MatchupDataType
+	teams: TeamInfoType[]
+	teamInfo: TeamInfoType
+	paramState: (URLSearchParams | SetURLSearchParams)[]
+}) {
+	const winLoss = teamInfo.Owner.id === matchup.HomeOwner ? matchup.HomeWL : matchup.AwayWL
+	const homeTeam = teams.filter(obj => obj.id === matchup.HomeTeam)[0]
+	const awayTeam = teams.filter(obj => obj.id === matchup.AwayTeam)[0]
+	let header = matchup.Season + ' - '
+	switch (matchup.GameType) {
+		case 'QF':
+			header += matchup.Season <= 2017 ? 'Quarterfinals' : 'Conference Semifinals'
+			break
+		case 'SF':
+			header += matchup.Season <= 2017 ? 'Semifinals' : 'Conference Finals'
+			break
+		case 'F':
+			header += 'GSHL Cup Final'
+			break
+		case 'LT':
+			header += "Loser's Tournament"
+			break
+		default:
+			header += 'Week ' + matchup.WeekNum
+			break
+	}
+	return (
+		<>
+			<div className="font-bold text-xs text-left px-8">{header}</div>
+			<Link
+				className={`grid grid-cols-7 mb-3 py-1 mx-1 items-center shadow-md rounded-xl ${
+					winLoss === 'W' ? 'bg-green-100' : winLoss === 'L' ? 'bg-red-100' : 'bg-slate-100'
+				}`}
+				to={'/matchup/' + matchup.id + '?' + paramState[0].toString()}>
+				<div className={'col-span-3 flex flex-col whitespace-nowrap text-center p-2 gap-2 items-center justify-center ' + matchup.HomeWL}>
+					{matchup.AwayRank && +matchup.AwayRank <= 8 && matchup.AwayRank ? (
+						<div className="flex flex-row">
+							<span className="text-sm xs:text-base text-black font-bold font-oswald pr-1">{'#' + matchup.AwayRank}</span>
+							<img className="w-8 xs:w-12" src={awayTeam?.LogoURL} alt="Away Team Logo" />
+						</div>
+					) : (
+						<img className="w-8 xs:w-12" src={awayTeam?.LogoURL} alt="Away Team Logo" />
+					)}
+					<div className={'text-base xs:text-lg font-oswald'}>{awayTeam?.TeamName}</div>
+				</div>
+				<div className="text-2xl xs:text-xl font-oswald text-center">
+					{matchup.HomeScore || matchup.AwayScore ? (
+						<>
+							<span className={matchup.AwayWL === 'W' ? 'text-emerald-700 font-bold' : matchup.AwayWL === 'L' ? 'text-rose-800' : ''}>
+								{matchup.AwayScore}
+							</span>
+							{' - '}
+							<span className={matchup.HomeWL === 'W' ? 'text-emerald-700 font-bold' : matchup.HomeWL === 'L' ? 'text-rose-800' : ''}>
+								{matchup.HomeScore}
+							</span>
+						</>
+					) : (
+						'@'
+					)}
+				</div>
+				<div className={'col-span-3 flex flex-col whitespace-nowrap text-center p-2 gap-2 items-center justify-center ' + matchup.HomeWL}>
+					{matchup.HomeRank && +matchup.HomeRank <= 8 && matchup.HomeRank ? (
+						<div className="flex flex-row">
+							<span className="text-sm xs:text-base text-black font-bold font-oswald pr-1">{'#' + matchup.HomeRank}</span>
+							<img className="w-8 xs:w-12" src={homeTeam.LogoURL} alt="Home Team Logo" />
+						</div>
+					) : (
+						<img className="w-8 xs:w-12" src={homeTeam.LogoURL} alt="Home Team Logo" />
+					)}
+					<div className={'text-base xs:text-lg font-oswald'}>{homeTeam.TeamName}</div>
+				</div>
+			</Link>
 		</>
 	)
 }

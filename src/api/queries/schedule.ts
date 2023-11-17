@@ -10,9 +10,11 @@ type ScheduleQueryOptions = {
     weekNum?: number,
     gameType?: 'RS'|'CC'|'NC'|'PO'|'QF'|'SF'|'F'|'LT',
     teamID?: number,
+	opponentID?: number,
     homeTeamID?: number,
     awayTeamID?: number,
     ownerID?: number,
+	oppOwnerID?: number,
     homeOwnerID?: number,
     awayOwnerID?: number,
 }
@@ -91,6 +93,9 @@ export function useScheduleData (options: ScheduleQueryOptions) {
 	if (options.teamID) {
         schedData = schedData.filter(obj => obj.HomeTeam === options.teamID || obj.AwayTeam === options.teamID)
     }
+	if (options.opponentID) {
+        schedData = schedData.filter(obj => obj.HomeTeam === options.opponentID || obj.AwayTeam === options.opponentID)
+    }
 	if (options.homeTeamID) {
         schedData = schedData.filter(obj => obj.HomeTeam === options.teamID)
     }
@@ -99,6 +104,9 @@ export function useScheduleData (options: ScheduleQueryOptions) {
     }
 	if (options.ownerID) {
         schedData = schedData.filter(obj => obj.HomeOwner === options.ownerID || obj.AwayOwner === options.ownerID)
+    }
+	if (options.oppOwnerID) {
+        schedData = schedData.filter(obj => obj.HomeOwner === options.oppOwnerID || obj.AwayOwner === options.oppOwnerID)
     }
 	if (options.homeOwnerID) {
         schedData = schedData.filter(obj => obj.HomeOwner === options.homeOwnerID)
