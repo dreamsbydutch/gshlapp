@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import { PageToolbar } from './ui/PageNavBar'
 import { SeasonInfoDataType } from '../api/types'
-import { useGSHLTeams } from '../api/queries/teams'
+import { PlayoffProbType, useGSHLTeams, usePlayoffProb } from '../api/queries/teams'
 import { StandingsInfoType, StandingsQueryOptions, useStandingsData } from '../api/queries/standings'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import ErrorPage from '../error'
 import { useSearchParams } from 'react-router-dom'
 import { seasons } from '../utils/constants'
+import { PlayoffBracket } from './pages/Playoffs'
 
 type StandingsOption = 'Overall' | 'Conference' | 'Wildcard' | 'Playoffs' | 'LosersTourney'
 
@@ -42,7 +43,7 @@ export default function Standings() {
 			) : (
 				<div className="flex flex-col mb-12">
 					<div className="text-2xl text-center py-2 font-bold">GSHL Cup Playoffs</div>
-					{/* <PlayoffBracket {...{ season }} /> */}
+					<PlayoffBracket {...{ seasonID: season.Season }} />
 					<div className="text-2xl text-center pt-12 pb-2 font-bold">Loser's Tournament</div>
 					{/* <LosersBracket {...{ season }} /> */}
 				</div>
@@ -116,41 +117,46 @@ const StandingsContainer = ({
 	season: SeasonInfoDataType
 	options: StandingsQueryOptions
 }) => {
-	const stdg = useStandingsData(options)
-	if (stdg.error) {
-		return <ErrorPage />
-	}
-	if (stdg.loading) {
+	const stdg = useStandingsData(options).data
+	const playoffProb = usePlayoffProb({ season: season.Season }).data
+	if (!stdg || !playoffProb) {
 		return <LoadingSpinner />
 	}
-
 	return (
 		<>
-			{stdg.data &&
-				stdg.data.map(team => {
-					// const teamProb = playoffProb?.filter(a => a.id === team.gshlTeam)[0]
-					return <StandingsItem key={team.gshlTeam} {...{ team, season, standingsType }} />
+			{stdg &&
+				stdg.map(team => {
+					const teamProb = playoffProb.filter(a => a.teamID === team.gshlTeam)[0]
+					return <StandingsItem key={team.gshlTeam} {...{ team, teamProb, season, standingsType }} />
 				})}
 		</>
 	)
 }
 
-const StandingsItem = ({ team, season, standingsType }: { team: StandingsInfoType; season: SeasonInfoDataType; standingsType: StandingsOption }) => {
+const StandingsItem = ({
+	team,
+	teamProb,
+	season,
+	standingsType,
+}: {
+	team: StandingsInfoType
+	teamProb: PlayoffProbType
+	season: SeasonInfoDataType
+	standingsType: StandingsOption
+}) => {
 	const [showInfo, setShowInfo] = useState(false)
-	const teamInfo = useGSHLTeams({ season, teamID: team.gshlTeam })
-	if (teamInfo.error) return <ErrorPage />
-	if (teamInfo.loading) return <LoadingSpinner />
-	// if (standingsType === 'LT' && +teamProb.LoserPer !== 1) {
-	// 	return (
-	// 		<div
-	// 			key={team.teamID}
-	// 			className="grid grid-cols-12 mx-auto py-1 font-varela text-gray-400 text-center items-center border-b border-dotted border-gray-400"
-	// 			onClick={() => setShowInfo(!showInfo)}>
-	// 			<div className="col-span-12">TBD</div>
-	// 		</div>
-	// 	)
-	// } else if (standingsType === 'LT') {
-	if (standingsType === 'LosersTourney') {
+	const teamInfo = useGSHLTeams({ season, teamID: team.gshlTeam }).data
+	if (!teamInfo) return <LoadingSpinner />
+	if (standingsType === 'LosersTourney' && +teamProb.LoserPer !== 1) {
+		return (
+			<div
+				key={team.gshlTeam}
+				className="grid grid-cols-12 mx-auto py-1 font-varela text-gray-400 text-center items-center border-b border-dotted border-gray-400"
+				onClick={() => setShowInfo(!showInfo)}>
+				<div className="col-span-12">TBD</div>
+			</div>
+		)
+	} else if (standingsType === 'LosersTourney') {
 		const LTDiff = team.LTCF - team.LTCA
 		return (
 			<div
@@ -160,7 +166,7 @@ const StandingsItem = ({ team, season, standingsType }: { team: StandingsInfoTyp
 				<div className="col-span-2 p-1">
 					<img className="w-12" src={String(team.LogoURL)} alt="Team Logo" />
 				</div>
-				<div className="col-span-7 font-bold text-base">{teamInfo.data && teamInfo.data[0]?.TeamName}</div>
+				<div className="col-span-7 font-bold text-base">{teamInfo && teamInfo[0]?.TeamName}</div>
 				<div className="col-span-2 text-sm">
 					{team.LTW} - {team.LTL}
 				</div>
@@ -173,8 +179,7 @@ const StandingsItem = ({ team, season, standingsType }: { team: StandingsInfoTyp
 							<div className="text-2xs font-bold pr-2">Tiebreak Pts:</div>
 							<div className="text-2xs">{team.LTPTS + ' pts'}</div>
 						</div>
-						<TeamInfo {...{ standingsType }} />
-						{/* <TeamInfo {...{ teamProb, standingsType }} /> */}
+						<TeamInfo {...{ teamProb, standingsType }} />
 					</>
 				) : (
 					<></>
@@ -188,21 +193,21 @@ const StandingsItem = ({ team, season, standingsType }: { team: StandingsInfoTyp
 				className="grid grid-cols-12 mx-auto py-1 font-varela text-center items-center border-b border-dotted border-gray-400"
 				onClick={() => setShowInfo(!showInfo)}>
 				<div className="col-span-2 p-1">
-					<img className="w-12" src={String(teamInfo.data && teamInfo.data[0]?.LogoURL)} alt="Team Logo" />
+					<img className="w-12" src={String(teamInfo && teamInfo[0]?.LogoURL)} alt="Team Logo" />
 				</div>
 				<div className="col-span-7 font-bold text-base">
-					{/* {+teamProb.OneSeed === 1
+					{teamProb.OneSeed === 1
 						? 'z - '
-						: +teamProb.OneConf === 1
+						: teamProb.OneConf === 1
 						? 'y - '
-						: +teamProb.PlayoffsPer === 1
+						: teamProb.PlayoffsPer === 1
 						? 'x - '
-						: +teamProb.LoserPer === 1
+						: teamProb.LoserPer === 1
 						? 'l - '
-						: +teamProb.PlayoffsPer === 0
+						: teamProb.PlayoffsPer === 0
 						? 'e - '
-						: ''} */}
-					{teamInfo.data && teamInfo.data[0]?.TeamName}
+						: ''}
+					{teamInfo && teamInfo[0]?.TeamName}
 				</div>
 				<div className="col-span-2 text-sm">
 					{team.W} - {team.L}
@@ -214,8 +219,7 @@ const StandingsItem = ({ team, season, standingsType }: { team: StandingsInfoTyp
 							<div className="text-2xs font-bold pr-2">Tiebreak Pts:</div>
 							<div className="text-2xs">{team.PTS + ' pts'}</div>
 						</div>
-						{/* <TeamInfo {...{ standingsType }} /> */}
-						{/* <TeamInfo {...{ teamProb, standingsType }} /> */}
+						<TeamInfo {...{ teamProb, standingsType }} />
 					</>
 				) : (
 					<></>
@@ -224,12 +228,12 @@ const StandingsItem = ({ team, season, standingsType }: { team: StandingsInfoTyp
 		)
 	}
 }
-const TeamInfo = ({ standingsType }: { standingsType: StandingsOption }) => {
+const TeamInfo = ({ teamProb, standingsType }: { teamProb: PlayoffProbType; standingsType: StandingsOption }) => {
 	switch (standingsType) {
 		case 'Overall':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{/* {[
+					{[
 						'OneSeed',
 						'TwoSeed',
 						'ThreeSeed',
@@ -249,51 +253,101 @@ const TeamInfo = ({ standingsType }: { standingsType: StandingsOption }) => {
 					].map((obj, i) => {
 						return (
 							<>
-								{teamProb[obj] && (
+								{teamProb[
+									obj as
+										| 'OneSeed'
+										| 'TwoSeed'
+										| 'ThreeSeed'
+										| 'FourSeed'
+										| 'FiveSeed'
+										| 'SixSeed'
+										| 'SevenSeed'
+										| 'EightSeed'
+										| 'NineSeed'
+										| 'TenSeed'
+										| 'ElevenSeed'
+										| 'TwelveSeed'
+										| 'ThirteenSeed'
+										| 'FourteenSeed'
+										| 'FifteenSeed'
+										| 'SixteenSeed'
+								] && (
 									<div className="flex flex-col gap-1 px-2 border-r border-gray-500 last:border-none">
 										<div className="text-xs font-bold">{i + 1 + (i + 1 === 1 ? 'st' : i + 1 === 2 ? 'nd' : i + 1 === 3 ? 'rd' : 'th') + ' Ovr'}</div>
-										<div className="text-xs">{Math.round(teamProb[obj] * 1000) / 10 + '%'}</div>
+										<div className="text-xs">
+											{Math.round(
+												teamProb[
+													obj as
+														| 'OneSeed'
+														| 'TwoSeed'
+														| 'ThreeSeed'
+														| 'FourSeed'
+														| 'FiveSeed'
+														| 'SixSeed'
+														| 'SevenSeed'
+														| 'EightSeed'
+														| 'NineSeed'
+														| 'TenSeed'
+														| 'ElevenSeed'
+														| 'TwelveSeed'
+														| 'ThirteenSeed'
+														| 'FourteenSeed'
+														| 'FifteenSeed'
+														| 'SixteenSeed'
+												] * 1000
+											) /
+												10 +
+												'%'}
+										</div>
 									</div>
 								)}
 							</>
 						)
-					})} */}
+					})}
 				</div>
 			)
 
 		case 'Conference':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{/* {['OneConf', 'TwoConf', 'ThreeConf', 'FourConf', 'FiveConf', 'SixConf', 'SevenConf', 'EightConf'].map((obj, i) => {
+					{['OneConf', 'TwoConf', 'ThreeConf', 'FourConf', 'FiveConf', 'SixConf', 'SevenConf', 'EightConf'].map((obj, i) => {
 						return (
 							<>
-								{teamProb[obj] && (
+								{teamProb[obj as 'OneConf' | 'TwoConf' | 'ThreeConf' | 'FourConf' | 'FiveConf' | 'SixConf' | 'SevenConf' | 'EightConf'] && (
 									<div className="flex flex-col gap-1 px-2 border-r border-gray-500 last:border-none">
 										<div className="text-xs font-bold">{i + 1 + (i + 1 === 1 ? 'st' : i + 1 === 2 ? 'nd' : i + 1 === 3 ? 'rd' : 'th') + ' Conf'}</div>
-										<div className="text-xs">{Math.round(teamProb[obj] * 1000) / 10 + '%'}</div>
+										<div className="text-xs">
+											{Math.round(
+												teamProb[obj as 'OneConf' | 'TwoConf' | 'ThreeConf' | 'FourConf' | 'FiveConf' | 'SixConf' | 'SevenConf' | 'EightConf'] * 1000
+											) /
+												10 +
+												'%'}
+										</div>
 									</div>
 								)}
 							</>
 						)
-					})} */}
+					})}
 				</div>
 			)
 
 		case 'Wildcard':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{/* {['PlayoffsPer', 'LoserPer', 'SFPer', 'FinalPer', 'CupPer'].map(obj => {
+					{['PlayoffsPer', 'LoserPer', 'SFPer', 'FinalPer', 'CupPer'].map(obj => {
 						return (
 							<>
-								{teamProb[obj] && (
+								{teamProb[obj as 'PlayoffsPer' | 'LoserPer' | 'SFPer' | 'FinalPer' | 'CupPer'] && (
 									<div className="flex flex-col gap-1 px-2 border-r border-gray-500 last:border-none">
 										<div className="text-xs font-bold">{obj.replace('Per', '')}</div>
-										<div className="text-xs">{Math.round(teamProb[obj] * 1000) / 10 + '%'}</div>
+										<div className="text-xs">
+											{Math.round(teamProb[obj as 'PlayoffsPer' | 'LoserPer' | 'SFPer' | 'FinalPer' | 'CupPer'] * 1000) / 10 + '%'}
+										</div>
 									</div>
 								)}
 							</>
 						)
-					})} */}
+					})}
 				</div>
 			)
 

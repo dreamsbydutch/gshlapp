@@ -196,6 +196,8 @@ export function PageToolbar(props: PageToolbarPropsType) {
 export function TeamsToggle(props: TeamsTogglePropsType) {
 	const teams = useGSHLTeams(props.teamOptions).data
 	const activeTeam = typeof props.activeKey === 'string' ? teams?.filter(obj => props.activeKey && obj.id === +props.activeKey)[0] : props.activeKey
+	console.log(activeTeam)
+	console.log(teams)
 	return (
 		<>
 			{props.seasonActiveKey && (
@@ -221,7 +223,7 @@ export function TeamsToggle(props: TeamsTogglePropsType) {
 							return (
 								<>
 									{i !== 0 && <span key={'split-' + i} className="h-4/6 border-1 border-gray-400" />}
-									{activeTeam === team ? (
+									{activeTeam?.id === team.id ? (
 										<div
 											key={team.id}
 											className={`rounded-md ${team.Conf === 'SV' ? 'bg-sunview-700' : 'bg-hotel-700'}`}

@@ -1,8 +1,9 @@
-import { useQuery } from 'react-query'
+import { useQueries, useQuery } from 'react-query'
 import { queryFunc } from '../fetch'
 import { Season, SeasonInfoDataType, WeekType } from '../types'
 import { formatPlayerStats, formatPlayerWeeks, formatStandings } from '../formatters'
 import { formatDate, getSeason } from '../../utils/utils'
+import { seasons } from '../../utils/constants'
 
 // PLAYER DATA TYPES
 type PlayerInfoType = {
@@ -106,7 +107,7 @@ export type PlayerAllStarsType = PlayerSeasonType & { LineupPos: string }
 //
 
 type PlayerTotalsOptions = {
-	season: Season
+	season?: Season
 	id?: number
 	WeekType?: WeekType
 	PlayerName?: string
@@ -119,7 +120,6 @@ type PlayerTotalsOptions = {
 }
 export function usePlayerTotals(options: PlayerTotalsOptions) {
 	const season: SeasonInfoDataType = getSeason(options.season)
-	console.log(season)
 	const queryKey = [String(season.Season), 'PlayerData', 'Totals']
 	const totals = useQuery(queryKey, queryFunc)
 	if (totals.isLoading) return { loading: true }
@@ -127,7 +127,7 @@ export function usePlayerTotals(options: PlayerTotalsOptions) {
 	if (!totals.isSuccess) return { error: totals }
 	let totalsData: PlayerSeasonType[] = totals.data
 		.map((obj: { [key: string]: string | number | Date | null }) => formatPlayerStats(obj))
-		.sort((a: PlayerSeasonType, b: PlayerSeasonType) => a.Rating - b.Rating)
+		.sort((a: PlayerSeasonType, b: PlayerSeasonType) => b.Rating - a.Rating)
 	if (options.season) {
 		totalsData = totalsData.filter(obj => obj.Season === season.Season)
 	}
@@ -160,6 +160,115 @@ export function usePlayerTotals(options: PlayerTotalsOptions) {
 	}
 	return { data: totalsData }
 }
+export function useAllPlayerTotals(options: PlayerTotalsOptions & { season?: Season }) {
+	let statQueries: PlayerSeasonType[] = useQueries(
+		seasons.map(season => {
+			if (!season.PlayerData) return { data: null }
+			const queryKey = [String(season.Season), 'PlayerData', 'Totals']
+			return {
+				queryKey,
+				queryFn: queryFunc,
+			}
+		})
+	)
+		.map(queryResult => {
+			const playerTotalData: PlayerSeasonType[] = queryResult.data?.map((obj: PlayerSeasonType) => formatPlayerStats(obj))
+			return playerTotalData
+		})
+		.flat()
+		.filter(Boolean)
+		.sort((a: PlayerSeasonType, b: PlayerSeasonType) => b.Rating - a.Rating)
+	if (options.season) {
+		statQueries = statQueries.filter(obj => obj.Season === options.season)
+	}
+	if (options.WeekType) {
+		statQueries = statQueries.filter(obj => obj.WeekType === options.WeekType)
+	}
+	if (options.PlayerName) {
+		statQueries = statQueries.filter(obj => obj.PlayerName === options.PlayerName)
+	}
+	if (options.nhlPos) {
+		statQueries = statQueries.filter(obj => options.nhlPos && obj.nhlPos === options.nhlPos)
+	}
+	if (options.PosGroup) {
+		console.log(statQueries[0])
+		statQueries = statQueries.filter(obj => obj.PosGroup === options.PosGroup)
+	}
+	if (options.nhlTeam) {
+		statQueries = statQueries.filter(obj => options.nhlTeam && obj.nhlTeam && obj.nhlTeam.includes(options.nhlTeam))
+	}
+	if (options.gshlTeam) {
+		statQueries = statQueries.filter(obj => options.gshlTeam && obj.gshlTeam.includes(options.gshlTeam))
+	}
+	if (options.RosterDaysMax) {
+		statQueries = statQueries.filter(obj => options.RosterDaysMax && obj.RosterDays <= options.RosterDaysMax)
+	}
+	if (options.RosterDaysMin) {
+		statQueries = statQueries.filter(obj => options.RosterDaysMin && obj.RosterDays >= options.RosterDaysMin)
+	}
+	return { data: statQueries }
+}
+export function useAllPlayerNHLStats(options: PlayerTotalsOptions & { season?: Season }) {
+	let statQueries: PlayerSeasonType[] = [
+		...useQueries(
+			seasons.map(season => {
+				if (!season.PlayerData) return { data: null }
+				const queryKey = [String(season.Season), 'PlayerData', 'NHLPlayerStats']
+				return {
+					queryKey,
+					queryFn: queryFunc,
+				}
+			})
+		).map(queryResult => {
+			const playerTotalData: PlayerSeasonType[] = queryResult.data?.map((obj: PlayerSeasonType) => formatPlayerStats(obj))
+			return playerTotalData
+		}),
+		...useQueries(
+			seasons.map(season => {
+				if (!season.PlayerData) return { data: null }
+				const queryKey = [String(season.Season), 'PlayerData', 'NHLGoalieStats']
+				return {
+					queryKey,
+					queryFn: queryFunc,
+				}
+			})
+		).map(queryResult => {
+			const playerTotalData: PlayerSeasonType[] = queryResult.data?.map((obj: PlayerSeasonType) => formatPlayerStats(obj))
+			return playerTotalData
+		}),
+	]
+		.flat()
+		.filter(Boolean)
+		.sort((a: PlayerSeasonType, b: PlayerSeasonType) => b.Rating - a.Rating)
+	if (options.season) {
+		statQueries = statQueries.filter(obj => obj.Season === options.season)
+	}
+	if (options.WeekType) {
+		statQueries = statQueries.filter(obj => obj.WeekType === options.WeekType)
+	}
+	if (options.PlayerName) {
+		statQueries = statQueries.filter(obj => obj.PlayerName === options.PlayerName)
+	}
+	if (options.nhlPos) {
+		statQueries = statQueries.filter(obj => options.nhlPos && obj.nhlPos === options.nhlPos)
+	}
+	if (options.PosGroup) {
+		statQueries = statQueries.filter(obj => obj.PosGroup === options.PosGroup)
+	}
+	if (options.nhlTeam) {
+		statQueries = statQueries.filter(obj => options.nhlTeam && obj.nhlTeam && obj.nhlTeam.includes(options.nhlTeam))
+	}
+	if (options.gshlTeam) {
+		statQueries = statQueries.filter(obj => options.gshlTeam && obj.gshlTeam.includes(options.gshlTeam))
+	}
+	if (options.RosterDaysMax) {
+		statQueries = statQueries.filter(obj => options.RosterDaysMax && obj.RosterDays <= options.RosterDaysMax)
+	}
+	if (options.RosterDaysMin) {
+		statQueries = statQueries.filter(obj => options.RosterDaysMin && obj.RosterDays >= options.RosterDaysMin)
+	}
+	return { data: statQueries }
+}
 
 type PlayerWeekOptions = {
 	season: Season
@@ -183,7 +292,7 @@ export function usePlayerWeeks(options: PlayerWeekOptions) {
 	if (!weeks.isSuccess) return { error: weeks }
 	let weeksData: PlayerWeekType[] = weeks.data
 		.map((obj: { [key: string]: string | number | Date | null }) => formatPlayerStats(obj))
-		.sort((a: PlayerWeekType, b: PlayerWeekType) => a.Rating - b.Rating)
+		.sort((a: PlayerWeekType, b: PlayerWeekType) => b.Rating - a.Rating)
 	if (options.season) {
 		weeksData = weeksData.filter(obj => obj.Season === season.Season)
 	}
@@ -234,7 +343,7 @@ type PlayerDayOptions = {
 	// injury?: 'DTD' | 'O' | 'IR' | 'IR-LT' | 'IR-NR' | 'COVID-19' | 'SUSP' | 'NA' | null
 }
 export function usePlayerDays(options: PlayerDayOptions) {
-	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const season: SeasonInfoDataType = getSeason(options.season)
 	const queryKey = [String(season.Season), 'PlayerData', 'Days']
 	const days = useQuery(queryKey, queryFunc)
 	if (days.isLoading) return { loading: true }
@@ -242,7 +351,7 @@ export function usePlayerDays(options: PlayerDayOptions) {
 	if (!days.isSuccess) return { error: days }
 	let daysData: PlayerDayType[] = days.data
 		.map((obj: { [key: string]: string | number | Date | null }) => formatPlayerStats(obj))
-		.sort((a: PlayerDayType, b: PlayerDayType) => a.Rating - b.Rating)
+		.sort((a: PlayerDayType, b: PlayerDayType) => b.Rating - a.Rating)
 	if (options.season) {
 		daysData = daysData.filter(obj => obj.Season === season.Season)
 	}
@@ -271,4 +380,40 @@ export function useAllPastDraftPicks(team?: TeamInfoType): PlayerDraftPickType[]
 		})
 		.flat()
 	return statQueries.filter(Boolean)
+}
+
+export type PlayerTradeBlockType = PlayerDayType & {
+	Rk: number
+	GRk: number
+	ARk: number
+	PRk: number
+	PPPRk: number
+	SOGRk: number
+	HITRk: number
+	BLKRk: number
+	WRk: number
+	GAARk: number
+	SVPRk: number
+}
+type TradeBlockOptions = {
+	season: Season
+	nhlPos?: 'C' | 'LW' | 'RW' | 'D' | 'G'
+	PosGroup?: 'F' | 'D' | 'G'
+	injury?: 'DTD' | 'O' | 'IR' | 'IR-LT' | 'IR-NR' | 'COVID-19' | 'SUSP' | 'NA' | null
+}
+export function useTradeBlock(options: TradeBlockOptions) {
+	const season: SeasonInfoDataType = seasons.slice(-1)[0]
+	const queryKey = [String(season.Season), 'PlayerData', 'TradeBlock']
+	const tradeBlock = useQuery(queryKey, queryFunc)
+	if (tradeBlock.isLoading) return { loading: true }
+	if (tradeBlock.isError) return { error: tradeBlock.error }
+	if (!tradeBlock.isSuccess) return { error: tradeBlock }
+	console.log(tradeBlock.data, queryKey)
+	let tradeBlockData: PlayerTradeBlockType[] = tradeBlock.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatPlayerStats(obj))
+		.sort((a: PlayerTradeBlockType, b: PlayerTradeBlockType) => b.Rating - a.Rating)
+	if (options.season) {
+		tradeBlockData = tradeBlockData.filter(obj => obj.Season === season.Season)
+	}
+	return { data: tradeBlockData }
 }

@@ -1,8 +1,16 @@
-import { Link, SetURLSearchParams, useSearchParams } from 'react-router-dom'
+import { SetURLSearchParams, useSearchParams } from 'react-router-dom'
 import { seasons, upcomingSeasons } from '../utils/constants'
 import { SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../utils/types'
 import { SeasonPageToggleNavbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
-import { TeamDraftPickType, TeamInfoType, useAllFutureDraftPicks, useCurrentRoster, useGSHLTeams } from '../api/queries/teams'
+import {
+	TeamAwardType,
+	TeamDraftPickType,
+	TeamInfoType,
+	useAllFutureDraftPicks,
+	useAwardHistory,
+	useCurrentRoster,
+	useGSHLTeams,
+} from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { getSeason, moneyFormatter } from '../utils/utils'
 import { PlayerContractType, useContractData } from '../api/queries/contracts'
@@ -18,7 +26,7 @@ type LockerRoomPagesType = 'Roster' | 'Contracts' | 'Player Stats' | 'Team Stats
 export default function LockerRoom() {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const lockerRoomPage: LockerRoomPagesType = searchParams.get('pgType') as LockerRoomPagesType
-	const season = seasons.filter(obj => obj.Season === Number(searchParams.get('season')))[0] || seasons.slice(-1)[0]
+	const season = seasons.slice(-1)[0]
 	const currentTeamData = useGSHLTeams({ season, teamID: Number(searchParams.get('teamID')) }).data
 	const plyrStatsSeason: Season = (searchParams.get('statSzn') || getSeason().Season) as Season
 	if (!currentTeamData) return <LoadingSpinner />
@@ -42,6 +50,7 @@ export default function LockerRoom() {
 			{ key: 'pgType', value: 'Trophy Case' },
 		],
 	}
+	searchParams.set('prev', 'lockerroom')
 	return (
 		<div className="my-4 text-center">
 			<TeamsToggle {...teamsToggleProps} />
@@ -79,7 +88,11 @@ export default function LockerRoom() {
 							<TeamHistoryContainer {...{ teamInfo: currentTeam, paramState: [searchParams, setSearchParams] }} />
 						</>
 					)}
-					{lockerRoomPage === 'Trophy Case' && <>{/* <TeamStatChart {...teamStatprops} /> */}</>}
+					{lockerRoomPage === 'Trophy Case' && (
+						<>
+							<TeamTrophyCase {...{ teamInfo: currentTeam }} />
+						</>
+					)}
 					<div className="mb-14 text-white">.</div>
 				</>
 			)}
@@ -336,12 +349,13 @@ function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 					if (obj.OriginalTeam !== obj.gshlTeam && gshlTeams) {
 						originalTeam = gshlTeams.filter(x => x.id === +obj.OriginalTeam)[0]
 					}
-					console.log(obj)
 					if (teamDraftPicks.length - i > currentTeamContracts.length) {
 						return (
 							<div key={i + 1} className="text-gray-800">
 								<div className="mx-auto w-5/6 py-1 px-2 text-center text-xs border-t border-gray-300">
-									{obj.Rd + numberSuffix(+obj.Rd)} Round, {obj.Pick + numberSuffix(+obj.Pick)} Overall
+									{`${obj.Rd + numberSuffix(+obj.Rd)} Round${
+										Number.isInteger(obj.Pick) ? ', ' + obj.Pick + numberSuffix(+obj.Pick) + ' Overall' : ''
+									}`}
 									{originalTeam ? ` (via ${originalTeam.TeamName})` : ''}
 								</div>
 							</div>
@@ -365,7 +379,7 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 	const currentRoster = useCurrentRoster({ season, gshlTeam: teamInfo.id }).data
 
 	if (!currentRoster || !teamPlayers || teamPlayers.length === 0) {
-		return <div></div>
+		return <LoadingSpinner />
 	}
 	return (
 		<>
@@ -385,8 +399,8 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">HIT</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">BLK</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Rtg</th>
-							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">GP</th>
+							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -420,8 +434,8 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 										<td className="py-1 px-2 text-center text-xs font-bold border-t border-b border-gray-300 bg-gray-50">
 											{Math.round(obj.Rating * 10) / 10}
 										</td>
-										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.GS}</td>
+										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 									</tr>
 								)
 							})}
@@ -442,8 +456,8 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 							</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200"></th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Rtg</th>
-							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">GP</th>
+							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -480,8 +494,8 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 										<td className="py-1 px-2 text-center text-xs font-bold border-t border-b border-gray-300 bg-gray-50">
 											{Math.round(obj.Rating * 10) / 10}
 										</td>
-										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.GS}</td>
+										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 									</tr>
 								)
 							})}
@@ -516,8 +530,8 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">HIT</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">BLK</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Rtg</th>
-							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">GP</th>
+							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -551,8 +565,8 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 										<td className="py-1 px-2 text-center text-xs font-bold border-t border-b border-gray-300 bg-gray-50">
 											{Math.round(obj.Rating * 10) / 10}
 										</td>
-										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.GS}</td>
+										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 									</tr>
 								)
 							})}
@@ -573,8 +587,8 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 							</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200"></th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Rtg</th>
-							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">GP</th>
+							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -611,8 +625,8 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 										<td className="py-1 px-2 text-center text-xs font-bold border-t border-b border-gray-300 bg-gray-50">
 											{Math.round(obj.Rating * 10) / 10}
 										</td>
-										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.GS}</td>
+										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 									</tr>
 								)
 							})}
@@ -647,8 +661,8 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">HIT</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">BLK</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Rtg</th>
-							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">GP</th>
+							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -682,8 +696,8 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 										<td className="py-1 px-2 text-center text-xs font-bold border-t border-b border-gray-300 bg-gray-50">
 											{Math.round(obj.Rating * 10) / 10}
 										</td>
-										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.GS}</td>
+										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 									</tr>
 								)
 							})}
@@ -704,8 +718,8 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 							</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200"></th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Rtg</th>
-							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">GP</th>
+							<th className="p-1 text-2xs font-normal text-center bg-gray-800 text-gray-200">Days</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -742,8 +756,8 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 										<td className="py-1 px-2 text-center text-xs font-bold border-t border-b border-gray-300 bg-gray-50">
 											{Math.round(obj.Rating * 10) / 10}
 										</td>
-										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.GS}</td>
+										<td className="py-1 px-1.5 text-center text-xs border-t border-b border-gray-300">{obj.RosterDays}</td>
 									</tr>
 								)
 							})}
@@ -774,6 +788,14 @@ function TeamHistoryContainer({ teamInfo, paramState }: { teamInfo: TeamInfoType
 		['Losers Tourney', 'LT'],
 	]
 	const seasonOptions = [
+		// ['2014-15', '2015'],
+		// ['2015-16', '2016'],
+		// ['2016-17', '2017'],
+		// ['2017-18', '2018'],
+		// ['2018-19', '2019'],
+		// ['2019-20', '2020'],
+		// ['2020-21', '2021'],
+		// ['2021-22', '2022'],
 		['2022-23', '2023'],
 		['2023-24', '2024'],
 		['All', ''],
@@ -814,7 +836,28 @@ function TeamHistoryContainer({ teamInfo, paramState }: { teamInfo: TeamInfoType
 			})
 		).sort((a, b) => a[0].localeCompare(b[0])),
 	]
-
+	const winLossRecord = [0, 0, 0]
+	schedule.forEach(obj => {
+		if (teamInfo.Owner.id === obj.HomeOwner && obj.HomeWL === 'W') {
+			winLossRecord[0] += 1
+		}
+		if (teamInfo.Owner.id === obj.HomeOwner && obj.HomeWL === 'L') {
+			winLossRecord[1] += 1
+		}
+		if (teamInfo.Owner.id === obj.HomeOwner && obj.HomeWL === 'T') {
+			winLossRecord[2] += 1
+		}
+		if (teamInfo.Owner.id === obj.AwayOwner && obj.AwayWL === 'W') {
+			winLossRecord[0] += 1
+		}
+		if (teamInfo.Owner.id === obj.AwayOwner && obj.AwayWL === 'L') {
+			winLossRecord[1] += 1
+		}
+		if (teamInfo.Owner.id === obj.AwayOwner && obj.AwayWL === 'T') {
+			winLossRecord[2] += 1
+		}
+	})
+	let seasonSplit = 2015
 	return (
 		<>
 			<div className="flex flex-col gap-1 mx-20">
@@ -875,9 +918,29 @@ function TeamHistoryContainer({ teamInfo, paramState }: { teamInfo: TeamInfoType
 					))}
 				</select>
 			</div>
+			<div className="font-bold text-xl mt-12">
+				<div>All-Time Record:</div>
+				<div>
+					{winLossRecord[0]}-{winLossRecord[1]}-{winLossRecord[2]} -{' '}
+					{Math.round(((winLossRecord[0] * 2 + winLossRecord[2]) / (2 * winLossRecord.reduce((p, c) => (p += c)))) * 1000) / 10}%
+				</div>
+			</div>
 			<div className="flex flex-col gap-2 mx-2 my-8">
-				{schedule.map(matchup => {
-					return <TeamHistoryMatchupLine {...{ matchup, teams, teamInfo, paramState }} />
+				{schedule.map((matchup, i) => {
+					if (matchup.Season !== seasonSplit) {
+						seasonSplit = matchup.Season
+						return (
+							<>
+								{i !== 0 && <div className="my-6 border-b border-slate-400 border-2"></div>}
+								<TeamHistoryMatchupLine {...{ matchup, teams, teamInfo, paramState }} />
+							</>
+						)
+					}
+					return (
+						<>
+							<TeamHistoryMatchupLine {...{ matchup, teams, teamInfo, paramState }} />
+						</>
+					)
 				})}
 			</div>
 		</>
@@ -891,7 +954,6 @@ function TeamHistoryContainer({ teamInfo, paramState }: { teamInfo: TeamInfoType
 		})
 	}
 }
-
 function TeamHistoryMatchupLine({
 	matchup,
 	teams,
@@ -926,12 +988,13 @@ function TeamHistoryMatchupLine({
 	}
 	return (
 		<>
-			<div className="font-bold text-xs text-left px-8">{header}</div>
-			<Link
-				className={`grid grid-cols-7 mb-3 py-1 mx-1 items-center shadow-md rounded-xl ${
+			<div className="font-bold text-sm text-left px-8">{header}</div>
+			{/* <Link */}
+			<div
+				className={`grid grid-cols-7 mb-3 py-1 px-1 items-center shadow-md rounded-xl ${
 					winLoss === 'W' ? 'bg-green-100' : winLoss === 'L' ? 'bg-red-100' : 'bg-slate-100'
-				}`}
-				to={'/matchup/' + matchup.id + '?' + paramState[0].toString()}>
+				}`}>
+				{/* to={'/matchup/' + matchup.id + '?' + paramState[0].toString()}> */}
 				<div className={'col-span-3 flex flex-col whitespace-nowrap text-center p-2 gap-2 items-center justify-center ' + matchup.HomeWL}>
 					{matchup.AwayRank && +matchup.AwayRank <= 8 && matchup.AwayRank ? (
 						<div className="flex flex-row">
@@ -969,7 +1032,233 @@ function TeamHistoryMatchupLine({
 					)}
 					<div className={'text-base xs:text-lg font-oswald'}>{homeTeam.TeamName}</div>
 				</div>
-			</Link>
+			</div>
+			{/* </Link> */}
 		</>
 	)
+}
+
+function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
+	const awardData = useAwardHistory({ ownerID: teamInfo.Owner.id })
+		.data?.sort((a, b) => b.Season - a.Season)
+		.sort((a, b) => a.id - b.id)
+	if (!awardData) {
+		return <LoadingSpinner />
+	}
+	const awards = [
+		'GSHL Cup Champion',
+		"President's Trophy Winner",
+		'Sunview Regular Season Champ',
+		'Hickory Hotel Regular Season Champ',
+		'League Loser',
+		'Hart Trophy Winner',
+		'GM of the Year',
+		'Coach of the Year',
+		'Calder Winner',
+		'Norris WInner',
+		'Vezina Winner',
+		'Art Ross Winner',
+		'Rocket Richard Winner',
+		'Selke Winner',
+		'Lady Byng Winner',
+	]
+	const awardSorted = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(obj => {
+		return awardData.filter(a => a.id === obj)
+	})
+	return (
+		<div className="flex flex-row gap-4 mx-2 flex-wrap justify-center">
+			<div className="w-full font-varela">
+				{awardSorted.map((obj, i) => {
+					if (obj.length === 0) return null
+					if (obj.length === 1)
+						return (
+							<div className={i === 0 ? '' : i < 5 ? 'text-xs' : 'text-2xs'}>
+								{obj[0].Season} {awards[i]}
+							</div>
+						)
+					return (
+						<div className={i === 0 ? '' : i < 5 ? 'text-xs' : 'text-2xs'}>
+							{obj.length}-time {awards[i]}
+						</div>
+					)
+				})}
+			</div>
+			{awardData.map(obj => (
+				<TrophyDisplay {...{ trophyID: obj.id, season: obj.Season, teamStats: obj, teamInfo }} />
+			))}
+		</div>
+	)
+}
+
+function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; season: Season; teamStats: TeamAwardType }) {
+	const teamInfo = useGSHLTeams({ teamID: teamStats.gshlTeam }).data
+	if (!teamInfo) return <></>
+	switch (trophyID) {
+		case 1:
+			return (
+				<div className="flex flex-col w-28 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/qqvph7Y4/gshlCup.jpg')]">
+						<img className="w-full mx-auto pt-20 pb-8 px-8" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald">GSHL Cup</div>
+				</div>
+			)
+			break
+		case 2:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/1XDpbZwq/presidents-trophy.png')]">
+						<img className="w-full mx-auto pt-16 pb-6 pl-5 pr-4" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">President's Trophy</div>
+				</div>
+			)
+			break
+		case 3:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/PJZ3bg7J/276.png')]">
+						<img className="w-full mx-auto pt-16 pb-6 px-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">2-7-6 Trophy</div>
+				</div>
+			)
+			break
+		case 4:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/wMh2Rhts/unit4.jpg')]">
+						<img className="w-full mx-auto pt-16 pb-6 px-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Unit 4 Trophy</div>
+				</div>
+			)
+			break
+		case 5:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/vHbvVcWF/losers.jpg')]">
+						<img className="w-full mx-auto pt-5 pb-16 px-7" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Adam Brophy Trophy</div>
+				</div>
+			)
+			break
+		case 6:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/Yqht1cJp/Hart.jpg')]">
+						<img className="w-full mx-auto pt-20 pb-2 px-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Hart Trophy</div>
+				</div>
+			)
+			break
+		case 7:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gJH93py2/gmofyear.jpg')]">
+						<img className="w-full mx-auto pt-16 pb-7 pr-7 pl-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">GM of the Year</div>
+				</div>
+			)
+			break
+		case 8:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/QCdQSg7W/Jack-Adams.jpg')]">
+						<img className="w-full mx-auto pt-16 pb-2 px-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Jack Adams Award</div>
+				</div>
+			)
+			break
+		case 9:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/k5nSMXpJ/calder.jpg')]">
+						<img className="w-full mx-auto pt-16 pb-5 px-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Calder Trophy</div>
+				</div>
+			)
+			break
+		case 10:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/Y0SMnT0z/norris.jpg')]">
+						<img className="w-full mx-auto pt-14 pb-2 px-5" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Norris Trophy</div>
+				</div>
+			)
+			break
+		case 11:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/DZ67c7vz/vezina.jpg')]">
+						<img className="w-full mx-auto pt-16 pb-4 pl-7 pr-5" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Vezina Trophy</div>
+				</div>
+			)
+			break
+		case 12:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gcMYXctS/Art-Ross.jpg')]">
+						<img className="w-full mx-auto pt-12 pb-4 px-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Art Ross Trophy</div>
+				</div>
+			)
+			break
+		case 13:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/NFP9p6sL/Rocket-Richard.jpg')]">
+						<img className="w-full mx-auto pt-12 pb-3 pl-7 pr-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Rocket Richard Trophy</div>
+				</div>
+			)
+			break
+		case 14:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/vH4N00PL/selke.jpg')]">
+						<img className="w-full mx-auto pt-12 pb-4 px-6" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Selke Trophy</div>
+				</div>
+			)
+			break
+		case 15:
+			return (
+				<div className="flex flex-col w-20 my-auto">
+					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gk1BQ3Q9/lady-byng.png')]">
+						<img className="w-full mx-auto pt-16 pb-3 px-7" src={teamInfo[0].LogoURL} />
+					</div>
+					<div className="font-oswald text-xl font-bold">{season}</div>
+					<div className="font-oswald text-sm">Lady Byng Trophy</div>
+				</div>
+			)
+			break
+	}
+	return <></>
 }

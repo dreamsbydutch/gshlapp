@@ -23,6 +23,7 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
       case 'CurrentRosters':
       case 'DraftHistory':
       case 'AllStars':
+      case 'TradeBlock':
         pageName = pageID as PlayerOptions
         queryType = statType
         break;
@@ -59,6 +60,7 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
       case 'Schedule':
       case 'Contracts':
       case 'Rulebook':
+      case 'Awards':
         pageName = pageID as InputOptions
         break;
       default:

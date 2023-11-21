@@ -97,7 +97,7 @@ module.exports = {
         },
       },
       gridTemplateColumns: {
-        'skaterStatTable': `minmax(35px, 1fr) minmax(50px, 1fr) minmax(35px, 1fr) repeat(8, minmax(15px, 1fr)) minmax(35px, 1fr)`,
+        'skaterStatTable': `minmax(35px, 1fr) minmax(50px, 1fr) minmax(30px, 1fr) repeat(8, minmax(25px, 1fr)) minmax(35px, 1fr)`,
         'goalieStatTable': `minmax(35px, 1fr) minmax(68px, 1fr) minmax(50px, 1fr) minmax(20px, 1fr) minmax(20px, 1fr) repeat(3, minmax(30px, 1fr))`,
         '12': `repeat(12, minmax(0, 1fr))`,
         '13': `repeat(13, minmax(0, 1fr))`,

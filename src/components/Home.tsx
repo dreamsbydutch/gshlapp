@@ -30,7 +30,6 @@ function MissedStarts() {
 	const teams = useGSHLTeams({ season: seasons.slice(-1)[0] })
 	const playerDaysData = usePlayerDays({ season: seasonToNumber(), Date: yesterday })
 	const missedStarts = playerDaysData.data?.filter(obj => obj.MS === 1).sort((a, b) => b.Rating - a.Rating)
-	console.log(playerDaysData, missedStarts)
 
 	if (!missedStarts || missedStarts?.length === 0) return <></>
 	return (

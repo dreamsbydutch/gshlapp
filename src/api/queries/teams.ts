@@ -217,3 +217,90 @@ export function useAllFutureDraftPicks(team?: TeamInfoType): TeamDraftPickType[]
 		.flat()
 	return statQueries.filter(Boolean)
 }
+
+
+type TeamAwardOptions ={
+	season?:Season,
+	teamID?:number,
+	ownerID?:number,
+	award?:string,
+}
+export type TeamAwardType = TeamSeasonType & {
+	Award:string
+}
+export function useAwardHistory(options: TeamAwardOptions) {
+	const season: SeasonInfoDataType = getSeason(options.season)
+	const queryKey = [String(season.Season), 'MainInput','Awards']
+	const awards = useQuery(queryKey, queryFunc)
+	if (awards.isLoading) return { loading: true }
+	if (awards.isError) return { error: awards.error }
+	if (!awards.isSuccess) return { error: awards }
+	let awardsData: TeamAwardType[] = awards.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatTeamStats(obj))
+	if (options.season) {awardsData = awardsData.filter(obj => obj.Season === options.season)}
+	if (options.teamID) {awardsData = awardsData.filter(obj => obj.gshlTeam === options.teamID)}
+	if (options.ownerID) {awardsData = awardsData.filter(obj => obj.owner === options.ownerID)}
+	if (options.award) {awardsData = awardsData.filter(obj => obj.Award === options.award)}
+	return { data: awardsData.filter(obj => obj.gshlTeam) }
+}
+
+
+
+export type PlayoffProbOptions = {
+	season: Season
+	teamID?:number
+}
+export type PlayoffProbType={
+	teamID: number
+	PlayoffsPer: number
+	LoserPer: number
+	AvgWins: number
+	MinWins: number
+	MaxWins: number
+	OneSeed: number
+	TwoSeed: number
+	ThreeSeed: number
+	FourSeed: number
+	FiveSeed: number
+	SixSeed: number
+	SevenSeed: number
+	EightSeed: number
+	NineSeed: number
+	TenSeed: number
+	ElevenSeed: number
+	TwelveSeed: number
+	ThirteenSeed: number
+	FourteenSeed: number
+	FifteenSeed: number
+	SixteenSeed: number
+	OneConf: number
+	TwoConf: number
+	ThreeConf: number
+	FourConf: number
+	FiveConf: number
+	SixConf: number
+	SevenConf: number
+	EightConf: number
+	QFPer: number
+	SFPer: number
+	FinalPer: number
+	CupPer: number
+	'1stPickPer': number
+	'3rdPickPer': number
+	'4thPickPer': number
+	'8thPickPer': number
+  }
+export function usePlayoffProb(options:PlayoffProbOptions) {
+	const season: SeasonInfoDataType = getSeason(options.season)
+	const queryKey = [String(season.Season), 'TeamData','Probabilities']
+	const prob = useQuery(queryKey, queryFunc)
+	if (prob.isLoading) return { loading: true }
+	if (prob.isError) return { error: prob.error }
+	if (!prob.isSuccess) return { error: prob }
+	let probData: PlayoffProbType[] = prob.data
+		.map((obj: { [key: string]: string }) => formatTeamInfo(obj))
+		console.log(probData)
+	if (options.teamID) {probData = probData.filter(obj => obj.teamID === options.teamID)}
+	return { data: probData }
+
+}

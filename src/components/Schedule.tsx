@@ -138,7 +138,7 @@ function WeekScheduleItem({
 			break
 	}
 
-	if (!homeTeam || !awayTeam) {
+	if (!homeTeam || !awayTeam || homeTeam.id === awayTeam.id) {
 		return <></>
 	}
 	return (

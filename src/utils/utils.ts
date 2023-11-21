@@ -73,6 +73,6 @@ export function dateToString(date?:Date|string) {
 }
 export function useCurrentWeek() {
 	const weeks = useWeeksData({season: getSeason()})
-	const currentWeek = weeks.data?.filter(obj => obj.StartDate <= new Date() && obj.EndDate >= new Date())[0]
+	const currentWeek = weeks.data?.filter(obj => formatDate(obj.StartDate) <= formatDate(new Date()) && formatDate(obj.EndDate) >= formatDate(new Date()))[0]
 	return currentWeek
 }

@@ -73,7 +73,7 @@ export function useScheduleData (options: ScheduleQueryOptions) {
 				schedData = schedData.filter(obj => obj.GameType === 'NC')
 				break;
 			case 'PO':
-				schedData = schedData.filter(obj => obj.GameType !== 'RS' && obj.GameType !== 'CC' && obj.GameType !== 'NC')
+				schedData = schedData.filter(obj => obj.GameType === 'QF' || obj.GameType === 'SF' || obj.GameType === 'F')
 				break;
 			case 'QF':
 				schedData = schedData.filter(obj => obj.GameType === 'QF')
