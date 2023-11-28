@@ -56,23 +56,33 @@ export function isSigningPeriod() {
 
 
 export function getSeason(season?:number) {
-	return season ? seasons.filter(obj => String(obj.Season) === String(season))[0] : seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0]
+	const date = new Date()
+	date.setHours(date.getHours()-8)
+	return season ? seasons.filter(obj => String(obj.Season) === String(season))[0] : seasons.filter(season => season.SeasonStartDate < date).slice(-1)[0]
 }
 export function seasonToNumber(season?:SeasonInfoDataType) {
-	return season ? +season.Season as Season : +seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0].Season as Season
+	const date = new Date()
+	date.setHours(date.getHours()-8)
+	return season ? +season.Season as Season : +seasons.filter(season => season.SeasonStartDate < date).slice(-1)[0].Season as Season
 }
 export function seasonToString(season?:SeasonInfoDataType) {
-	return season ? String(season.Season) : String(seasons.filter(season => season.SeasonStartDate < new Date()).slice(-1)[0].Season)
+	const date = new Date()
+	date.setHours(date.getHours()-8)
+	return season ? String(season.Season) : String(seasons.filter(season => season.SeasonStartDate < date).slice(-1)[0].Season)
 }
 export function dateToString(date?:Date|string) {
 	if (typeof date === 'string') return date
 	if (date && typeof date !== 'string') {
 		return formatDate(date)
 	}
-	return formatDate(new Date())
+	const date2 = new Date()
+	date2.setHours(date2.getHours()-8)
+	return formatDate(date2)
 }
 export function useCurrentWeek() {
+	const date = new Date()
+	date.setHours(date.getHours()-8)
 	const weeks = useWeeksData({season: getSeason()})
-	const currentWeek = weeks.data?.filter(obj => formatDate(obj.StartDate) <= formatDate(new Date()) && formatDate(obj.EndDate) >= formatDate(new Date()))[0]
+	const currentWeek = weeks.data?.filter(obj => formatDate(obj.StartDate) <= formatDate(date) && formatDate(obj.EndDate) >= formatDate(date))[0]
 	return currentWeek
 }

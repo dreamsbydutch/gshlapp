@@ -45,7 +45,7 @@ export default function LockerRoom() {
 			{ key: 'pgType', value: 'Roster' },
 			{ key: 'pgType', value: 'Contracts' },
 			{ key: 'pgType', value: 'Player Stats' },
-			{ key: 'pgType', value: 'Team Stats' },
+			// { key: 'pgType', value: 'Team Stats' },
 			{ key: 'pgType', value: 'History' },
 			{ key: 'pgType', value: 'Trophy Case' },
 		],

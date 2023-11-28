@@ -2,7 +2,7 @@ import { seasons } from "../utils/constants";
 
 type PlayerOptions = 'Days' | 'Weeks' | 'Splits' | 'Totals' | 'NHLPlayerStats' | 'NHLGoalieStats' | 'Salaries' | 'CurrentRosters' | 'DraftHistory' | 'AllStars'
 type TeamOptions = 'Days' | 'Weeks' | 'Seasons' | 'Standings' | 'AwardWinners' | 'DraftPicks' | 'NHLStandings' | 'Probabilities' | 'DraftOrder' | 'AwardNominees'
-type InputOptions = 'Users' | 'GSHLTeams' | 'Weeks' | 'Schedule' | 'Contracts' | 'Rulebook'
+type InputOptions = 'Users' | 'GSHLTeams' | 'Weeks' | 'Schedule' | 'Contracts' | 'Rulebook' | 'Headlines'
 type StatTypeType = 'PlayerData' | 'TeamData'
 
 
@@ -61,6 +61,7 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
       case 'Contracts':
       case 'Rulebook':
       case 'Awards':
+      case 'Headlines':
         pageName = pageID as InputOptions
         break;
       default:
