@@ -15,8 +15,9 @@ export default function Schedule() {
 	const season = seasons.filter(obj => obj.Season === Number(searchParams.get('season')))[0] || seasons.slice(-1)[0]
 	const currentTeamData = useGSHLTeams({ season, teamID: Number(searchParams.get('teamID')) }).data
 	const currentWeekData = useWeeksData({ season, WeekNum: Number(searchParams.get('weekNum')) }).data
-	if (!currentWeekData || !currentTeamData) return <LoadingSpinner />
-	const currentWeek = searchParams.get('weekNum') ? currentWeekData[0] : undefined
+	const liveWeekData = useWeeksData({ season, Date: new Date() }).data
+	if (!currentWeekData || !currentTeamData || !liveWeekData) return <LoadingSpinner />
+	const currentWeek = searchParams.get('weekNum') ? currentWeekData[0] : liveWeekData[0]
 	const currentTeam = searchParams.get('teamID') ? currentTeamData[0] : undefined
 	const pageToolbarProps = {
 		activeKey: scheduleType,
@@ -53,7 +54,7 @@ export default function Schedule() {
 }
 
 function WeeklyScheduleContainer(props: {
-	currentWeek: ScheduleWeekType | undefined
+	currentWeek: ScheduleWeekType
 	currentSeason: SeasonInfoDataType
 	paramState: (URLSearchParams | SetURLSearchParams)[]
 }) {
@@ -63,8 +64,7 @@ function WeeklyScheduleContainer(props: {
 		paramState: props.paramState,
 		weekOptions: { season: props.currentSeason },
 	}
-	const currentWeekData = useWeeksData({ season: props.currentSeason, Date: new Date() }).data
-	const scheduleWeek = props.currentWeek || !currentWeekData ? props.currentWeek : currentWeekData[0]
+	const scheduleWeek = props.currentWeek
 	const matchups = useScheduleData({ season: props.currentSeason, weekNum: scheduleWeek?.WeekNum })
 	if (matchups.data) {
 		matchups.data.sort((a, b) => (a.MatchupRtg && b.MatchupRtg ? b.MatchupRtg - a.MatchupRtg : -1))
@@ -268,8 +268,8 @@ function TeamScheduleItem({
 				<div className="place-self-center font-varela">{output[0]}</div>
 				<div className="col-span-6 text-base place-self-center font-varela">
 					{matchup.AwayTeam === team.id
-						? '@ ' + (matchup.HomeRank ? '#' + matchup.HomeRank + ' ' : '') + opponent.TeamName
-						: 'v ' + (matchup.AwayRank ? '#' + matchup.AwayRank + ' ' : '') + opponent.TeamName}
+						? '@ ' + (matchup.HomeRank && matchup.HomeRank <= 8 ? '#' + matchup.HomeRank + ' ' : '') + opponent.TeamName
+						: 'v ' + (matchup.AwayRank && matchup.AwayRank <= 8 ? '#' + matchup.AwayRank + ' ' : '') + opponent.TeamName}
 				</div>
 				{((currentWeek.WeekNum && currentWeek.WeekNum >= matchup.WeekNum && currentWeek.Season === getSeason(matchup.Season)) ||
 					currentWeek.Season !== getSeason(matchup.Season)) && (

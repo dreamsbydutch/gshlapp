@@ -15,7 +15,7 @@ import { LoadingSpinner } from './ui/LoadingSpinner'
 import { getSeason, moneyFormatter } from '../utils/utils'
 import { PlayerContractType, useContractData } from '../api/queries/contracts'
 import updateSearchParams from '../utils/updateSearchParams'
-import { usePlayerTotals } from '../api/queries/players'
+import { usePlayerSplits, usePlayerTotals } from '../api/queries/players'
 import TeamRoster from './ui/CurrentRoster'
 import { Season } from '../api/types'
 import { useState } from 'react'
@@ -375,7 +375,7 @@ function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 }
 
 function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; season: Season }) {
-	const teamPlayers = usePlayerTotals({ season, gshlTeam: teamInfo.id, WeekType: 'RS' }).data
+	const teamPlayers = usePlayerSplits({ season, gshlTeam: teamInfo.id, WeekType: 'RS' }).data
 	const currentRoster = useCurrentRoster({ season, gshlTeam: teamInfo.id }).data
 
 	if (!currentRoster || !teamPlayers || teamPlayers.length === 0) {
@@ -416,7 +416,7 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
-										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos}</td>
+										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos.toString()}</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">
 											<img
 												src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${obj?.nhlTeam?.slice(-1)}.png`}
@@ -473,7 +473,7 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
-										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos}</td>
+										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos.toString()}</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">
 											<img
 												src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${obj?.nhlTeam?.slice(-1)}.png`}
@@ -506,7 +506,7 @@ function TeamPlayerStatsTable({ teamInfo, season }: { teamInfo: TeamInfoType; se
 	)
 }
 function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; season: Season }) {
-	const teamPlayers = usePlayerTotals({ season, gshlTeam: teamInfo.id, WeekType: 'PO' }).data
+	const teamPlayers = usePlayerSplits({ season, gshlTeam: teamInfo.id, WeekType: 'PO' }).data
 	const currentRoster = useCurrentRoster({ season, gshlTeam: teamInfo.id }).data
 
 	if (!currentRoster || !teamPlayers || teamPlayers.length === 0) {
@@ -547,7 +547,7 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
-										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos}</td>
+										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos.toString()}</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">
 											<img
 												src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${obj?.nhlTeam?.slice(-1)}.png`}
@@ -604,7 +604,7 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
-										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos}</td>
+										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos.toString()}</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">
 											<img
 												src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${obj?.nhlTeam?.slice(-1)}.png`}
@@ -637,7 +637,7 @@ function TeamPOPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 	)
 }
 function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; season: Season }) {
-	const teamPlayers = usePlayerTotals({ season, gshlTeam: teamInfo.id, WeekType: 'LT' }).data
+	const teamPlayers = usePlayerSplits({ season, gshlTeam: teamInfo.id, WeekType: 'LT' }).data
 	const currentRoster = useCurrentRoster({ season, gshlTeam: teamInfo.id }).data
 
 	if (!currentRoster || !teamPlayers || teamPlayers.length === 0) {
@@ -678,7 +678,7 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
-										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos}</td>
+										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos.toString()}</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">
 											<img
 												src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${obj?.nhlTeam?.slice(-1)}.png`}
@@ -735,7 +735,7 @@ function TeamLTPlayerStats({ teamInfo, season }: { teamInfo: TeamInfoType; seaso
 											} sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50`}>
 											{obj.PlayerName}
 										</td>
-										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos}</td>
+										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{obj.nhlPos.toString()}</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">
 											<img
 												src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${obj?.nhlTeam?.slice(-1)}.png`}

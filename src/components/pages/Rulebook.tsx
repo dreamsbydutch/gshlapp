@@ -59,7 +59,7 @@ const rulebook: [string, (string | [string, string[]])[]][] = [
 		[
 			'2 Centers, 2 Left Wingers, 2 Right Wingers, 3 Defensemen, 1 Utility Skater, 1 Goalie, 4 Bench Spots',
 			'Teams have 1 IR slot and 1 IR+ slot for injury relief',
-			'Maximum of two healthy goalies are allowed on a roster at any point. Violators of this rule will have one of their goalies dropped at random by the commissioner',
+			'Maximum of two healthy goalies are allowed on a roster at any point. The third goalie to be added will not be allowed to accumulate stats for the team, even if they start games on Yahoo their stats will be deleted from the official record.',
 		],
 	],
 	[
@@ -116,7 +116,7 @@ const rulebook: [string, (string | [string, string[]])[]][] = [
 			'Second round playoff matchups are the Conference Championship games',
 			'Both Conference Championship winners will play in the annual GSHL Cup Final',
 			'When a team is eliminated from the playoffs their roster is locked immediately and there are no consolation games',
-			'The yearly buy-in for each team is $50. Yearly Payouts are $600 for the GSHL Cup champion, $150 for the GSHL Cup runner up, and the final $50 go to admin fees (engraving, etc.)',
+			'The yearly buy-in for each team is $60. Yearly Payouts are $600 for the GSHL Cup champion, $150 for the GSHL Cup runner up, and the final $210 go to admin fees (engraving, draft food, etc.)',
 		],
 	],
 	[

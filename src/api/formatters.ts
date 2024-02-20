@@ -3,6 +3,7 @@ import { SeasonInfoDataType } from "./types"
 
 function formatNumbersInsideInputs(inputObj: { [key: string]: (number|string|string[]|number[]|Date|null) }) {
 	for (const key in inputObj) {
+		if (typeof inputObj[key] === 'string') {inputObj[key] = inputObj[key].replace("$","").replace(",","")}
 		if (inputObj[key] === '') {
 			inputObj[key] = null
 		} else if (typeof inputObj[key] !== 'object' && !isNaN(Number(inputObj[key]))) {
@@ -45,14 +46,23 @@ export function formatContracts(contract: { [key: string]: (number|string|string
 	contract.CapHitExpiry = contract.CapHitExpiry && new Date(contract.CapHitExpiry as string)
 	return contract
 }
+export function formatSalaries(contract: { [key: string]: (number|string|string[]|number[]|Date|null) }) {
+	if (typeof contract.ProjectedSalary === 'string') { contract.ProjectedSalary = contract.ProjectedSalary.replace("$","").replace(",","")}
+	if (typeof contract.CurrentSalary === 'string') { contract.CurrentSalary = contract.CurrentSalary.replace("$","").replace(",","")}
+	if (typeof contract.EarlySalary === 'string') { contract.EarlySalary = contract.EarlySalary.replace("$","").replace(",","")}
+	if (typeof contract.LateSalary === 'string') { contract.LateSalary = contract.LateSalary.replace("$","").replace(",","")}
+	if (typeof contract.Savings === 'string') { contract.Savings = contract.Savings.replace("$","").replace(",","")}
+	contract = formatNumbersInsideInputs(contract)
+	return contract
+}
 export function formatPlayerStats(statLine: { [key: string]: (number|string|string[]|number[]|Date|null) }) {
 	if (statLine.Date) {
 		statLine.Date = typeof statLine.Date === 'string' ? new Date(statLine.Date + "T00:00:00") : statLine.Date
 	}
-	statLine = formatNumbersInsideInputs(statLine)
 	statLine.gshlTeam = String(statLine.gshlTeam).split(",").map(obj => +obj)
 	statLine.nhlTeam = String(statLine.nhlTeam).split(",")
 	statLine.nhlPos = String(statLine.nhlPos).split(",")
+	statLine = formatNumbersInsideInputs(statLine)
 	return statLine
 }
 export function formatTeamStats(statLine: { [key: string]: (number|string|string[]|number[]|Date|null) }) {
@@ -61,9 +71,9 @@ export function formatTeamStats(statLine: { [key: string]: (number|string|string
 	return statLine
 }
 export function formatCurrentRoster(player: { [key: string]: (number|string|string[]|number[]|Date|null) }) {
-	player = formatNumbersInsideInputs(player)
 	player.nhlPos = String(player.nhlPos).split(",")
 	player.nhlTeam = String(player.nhlTeam).split(",")
 	player.gshlTeam = String(player.gshlTeam).split(",").map(obj => +obj)
+	player = formatNumbersInsideInputs(player)
 	return player
 }

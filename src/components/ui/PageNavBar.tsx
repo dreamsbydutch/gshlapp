@@ -196,8 +196,6 @@ export function PageToolbar(props: PageToolbarPropsType) {
 export function TeamsToggle(props: TeamsTogglePropsType) {
 	const teams = useGSHLTeams(props.teamOptions).data
 	const activeTeam = typeof props.activeKey === 'string' ? teams?.filter(obj => props.activeKey && obj.id === +props.activeKey)[0] : props.activeKey
-	console.log(activeTeam)
-	console.log(teams)
 	return (
 		<>
 			{props.seasonActiveKey && (

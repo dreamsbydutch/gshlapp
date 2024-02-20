@@ -120,7 +120,7 @@ export function useGSHLTeams (options: TeamsQueryOptions) {
 		BS:number,
 		Rating:number,
 	}
-	type TeamDayType = TeamBaseType & {
+	export type TeamDayType = TeamBaseType & {
 		WeekNum:number,
 		Date: Date,
 	}
@@ -130,7 +130,7 @@ export function useGSHLTeams (options: TeamsQueryOptions) {
 		PwrRtg:number,
 		PwrRk:number,
 	}
-	type TeamSeasonType = TeamBaseType & {
+	export type TeamSeasonType = TeamBaseType & {
 		Players:number,
 		Norris:number,
 		Vezina:number,
@@ -142,6 +142,26 @@ export function useGSHLTeams (options: TeamsQueryOptions) {
 
 
 
+export type TeamDayOptions = {
+	season: Season,
+	WeekNum?: number,
+	gshlTeam?: number,
+}
+export function useTeamDays(options: TeamDayOptions) {
+	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const queryKey = [String(season.Season), 'TeamData', 'Days']
+	const days = useQuery(queryKey, queryFunc)
+	if (days.isLoading) return { loading: true }
+	if (days.isError) return { error: days.error }
+	if (!days.isSuccess) return { error: days }
+	let daysData: TeamDayType[] = days.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatTeamStats(obj))
+		.sort((a: TeamDayType, b: TeamDayType) => a.Rating - b.Rating)
+	if (options.season) {daysData = daysData.filter(obj => obj.Season === season.Season)}
+	if (options.WeekNum) {daysData = daysData.filter(obj => obj.WeekNum === options.WeekNum)}
+	if (options.gshlTeam) {daysData = daysData.filter(obj => obj.gshlTeam === options.gshlTeam)}
+	return { data: daysData }
+}
 export type TeamWeekOptions = {
 	season: Season,
 	WeekNum?: number,
@@ -161,6 +181,24 @@ export function useTeamWeeks(options: TeamWeekOptions) {
 	if (options.WeekNum) {weeksData = weeksData.filter(obj => obj.WeekNum === options.WeekNum)}
 	if (options.gshlTeam) {weeksData = weeksData.filter(obj => obj.gshlTeam === options.gshlTeam)}
 	return { data: weeksData }
+}
+export type TeamSeasonOptions = {
+	season: Season,
+	gshlTeam?: number,
+}
+export function useTeamSeasons(options: TeamSeasonOptions) {
+	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
+	const queryKey = [String(season.Season), 'TeamData', 'Seasons']
+	const seasons = useQuery(queryKey, queryFunc)
+	if (seasons.isLoading) return { loading: true }
+	if (seasons.isError) return { error: seasons.error }
+	if (!seasons.isSuccess) return { error: seasons }
+	let seasonsData: TeamSeasonType[] = seasons.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatTeamStats(obj))
+		.sort((a: TeamSeasonType, b: TeamSeasonType) => a.Rating - b.Rating)
+	if (options.season) {seasonsData = seasonsData.filter(obj => obj.Season === season.Season)}
+	if (options.gshlTeam) {seasonsData = seasonsData.filter(obj => obj.gshlTeam === options.gshlTeam)}
+	return { data: seasonsData }
 }
 
 

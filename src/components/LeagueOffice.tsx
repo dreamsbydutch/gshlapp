@@ -95,7 +95,7 @@ function PlayerListing({ player, team, contract }: { player: PlayerTradeBlockTyp
 				className="flex flex-col bg-slate-100 rounded-xl shadow-xl border-2 border-slate-300 py-1.5 px-4 my-3 gap-4">
 				<div className="flex">
 					<div className="w-10 my-auto">
-						<img src={team.LogoURL} alt="NHL Team Logo" className="w-full" />
+						<img src={team && team.LogoURL} alt="NHL Team Logo" className="w-full" />
 					</div>
 					<div className="flex flex-col mx-auto my-auto">
 						<div className="flex content-between mx-1 gap-2">
@@ -248,7 +248,7 @@ function PlayerCardStats({ PlayerName, PosGroup }: { PlayerName: string; PosGrou
 					<div className="flex min-w-max gap-0.5">
 						{statItem.gshlTeam.map(x => (
 							<img
-								src={teamData?.filter(a => a.id === x)[0].LogoURL}
+								src={teamData?.filter(a => a.id === x)[0] && teamData?.filter(a => a.id === x)[0].LogoURL}
 								alt="GSHL Team Logo"
 								className={`${statItem.gshlTeam.length === 1 ? 'w-4' : statItem.gshlTeam.length === 2 ? 'w-3.5' : 'w-3'} mx-auto inline-block`}
 							/>
@@ -324,7 +324,7 @@ function PlayerCardStats({ PlayerName, PosGroup }: { PlayerName: string; PosGrou
 					<div className="flex min-w-max gap-0.5">
 						{statItem.gshlTeam.map(x => (
 							<img
-								src={teamData?.filter(a => a.id === x)[0].LogoURL}
+								src={teamData?.filter(a => a.id === x)[0] && teamData?.filter(a => a.id === x)[0].LogoURL}
 								alt="GSHL Team Logo"
 								className={`${statItem.gshlTeam.length === 1 ? 'w-4' : statItem.gshlTeam.length === 2 ? 'w-3.5' : 'w-3'} mx-auto inline-block`}
 							/>

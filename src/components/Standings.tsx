@@ -204,7 +204,7 @@ const StandingsItem = ({
 						? 'x - '
 						: teamProb.LoserPer === 1
 						? 'l - '
-						: teamProb.PlayoffsPer === 0
+						: !teamProb.PlayoffsPer
 						? 'e - '
 						: ''}
 					{teamInfo && teamInfo[0]?.TeamName}
@@ -271,11 +271,9 @@ const TeamInfo = ({ teamProb, standingsType }: { teamProb: PlayoffProbType; stan
 										| 'FourteenSeed'
 										| 'FifteenSeed'
 										| 'SixteenSeed'
-								] && (
+								] !== 0 && (
 									<div className="flex flex-col gap-1 px-2 border-r border-gray-500 last:border-none">
-										<div className="text-xs font-bold">
-											{i + 1 + (i + 1 === 1 ? 'st' : i + 1 === 2 ? 'nd' : i + 1 === 3 ? 'rd' : 'th') + ' Ovr'}
-										</div>
+										<div className="text-xs font-bold">{i + 1 + (i + 1 === 1 ? 'st' : i + 1 === 2 ? 'nd' : i + 1 === 3 ? 'rd' : 'th') + ' Ovr'}</div>
 										<div className="text-xs">
 											{Math.round(
 												teamProb[
@@ -315,7 +313,7 @@ const TeamInfo = ({ teamProb, standingsType }: { teamProb: PlayoffProbType; stan
 					{['OneConf', 'TwoConf', 'ThreeConf', 'FourConf', 'FiveConf', 'SixConf', 'SevenConf', 'EightConf'].map((obj, i) => {
 						return (
 							<>
-								{teamProb[obj as 'OneConf' | 'TwoConf' | 'ThreeConf' | 'FourConf' | 'FiveConf' | 'SixConf' | 'SevenConf' | 'EightConf'] && (
+								{teamProb[obj as 'OneConf' | 'TwoConf' | 'ThreeConf' | 'FourConf' | 'FiveConf' | 'SixConf' | 'SevenConf' | 'EightConf'] !== 0 && (
 									<div className="flex flex-col gap-1 px-2 border-r border-gray-500 last:border-none">
 										<div className="text-xs font-bold">{i + 1 + (i + 1 === 1 ? 'st' : i + 1 === 2 ? 'nd' : i + 1 === 3 ? 'rd' : 'th') + ' Conf'}</div>
 										<div className="text-xs">
@@ -339,7 +337,7 @@ const TeamInfo = ({ teamProb, standingsType }: { teamProb: PlayoffProbType; stan
 					{['PlayoffsPer', 'LoserPer', 'SFPer', 'FinalPer', 'CupPer'].map(obj => {
 						return (
 							<>
-								{teamProb[obj as 'PlayoffsPer' | 'LoserPer' | 'SFPer' | 'FinalPer' | 'CupPer'] && (
+								{teamProb[obj as 'PlayoffsPer' | 'LoserPer' | 'SFPer' | 'FinalPer' | 'CupPer'] !== 0 && (
 									<div className="flex flex-col gap-1 px-2 border-r border-gray-500 last:border-none">
 										<div className="text-xs font-bold">{obj.replace('Per', '')}</div>
 										<div className="text-xs">

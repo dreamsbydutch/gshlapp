@@ -3,15 +3,16 @@ import { Link, SetURLSearchParams, useParams, useSearchParams } from 'react-rout
 import { MatchupDataType, useScheduleData } from '../api/queries/schedule'
 import { PlayerWeekType, usePlayerDays, usePlayerTotals, usePlayerWeeks } from '../api/queries/players'
 import { LoadingSpinner } from './ui/LoadingSpinner'
-import { TeamInfoType, TeamWeekType, useCurrentRoster, useGSHLTeams, useTeamWeeks } from '../api/queries/teams'
-import { formatDate, getSeason, useCurrentWeek } from '../utils/utils'
+import { TeamInfoType, TeamWeekType, useGSHLTeams, useTeamWeeks } from '../api/queries/teams'
+import { dateToString, formatDate, getSeason, useCurrentWeek } from '../utils/utils'
 import { BackButton } from './ui/BackButton'
 import { useState } from 'react'
+import { useWeeksData } from '../api/queries/weeks'
 
 export default function MatchupContainer() {
 	const { id } = useParams()
 	const [searchParams, setSearchParams] = useSearchParams()
-	const schedData = useScheduleData({ id: Number(id) })
+	const schedData = useScheduleData({ id: Number(id?.replace(',', '')) })
 	if (!schedData.data) return <LoadingSpinner />
 	return <Matchup paramState={[searchParams, setSearchParams]} matchup={schedData.data[0]} />
 }
@@ -360,13 +361,16 @@ function MatchupBoxscore({
 	}
 	matchupTeams: { homeTeam: TeamInfoType; awayTeam: TeamInfoType }
 }) {
-	const currentRoster = useCurrentRoster({ season: matchup.Season })
+	const week = useWeeksData({ season: matchup.Season, WeekNum: matchup.WeekNum }).data
+	const currentRoster = usePlayerDays({
+		season: matchup.Season,
+		Date: week && (dateToString(week[0].EndDate) > dateToString() ? new Date(dateToString()) : week[0].EndDate),
+	})
 	const [boxscoreTeam, setBoxscoreTeam] = useState('home')
 	const teamStats = matchupStats && (boxscoreTeam === 'home' ? matchupStats.homePlayers : matchupStats.awayPlayers)
 	if (!teamStats || !currentRoster.data) {
 		return <LoadingSpinner />
 	}
-	console.log(teamStats)
 	return (
 		<div className="mb-16 font-varela">
 			<div className="mt-12 mb-4 mx-1">
@@ -438,7 +442,7 @@ function MatchupBoxscore({
 											{player.PlayerName}
 										</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300" key="Pos">
-											{player.nhlPos}
+											{player.nhlPos.toString()}
 										</td>
 										<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300" key="Team">
 											<img
@@ -657,18 +661,6 @@ function PlayingToday({ matchup, matchupTeams }: { matchup: MatchupDataType; mat
 	if (!playerDayStats.data) {
 		return <LoadingSpinner />
 	}
-	function addHoursToTime({ timeString, hoursToAdd }: { timeString: string; hoursToAdd: number }) {
-		// Convert time string to a Date object
-		const dateObj = new Date('January 1, 2022 ' + timeString)
-
-		// Add hours to the Date object
-		dateObj.setHours(dateObj.getHours() + hoursToAdd)
-
-		// Format the Date object back into a string
-		const formattedTime = dateObj.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
-
-		return formattedTime
-	}
 	const currentDate = new Date()
 	currentDate.setHours(currentDate.getHours() - 5)
 	return (
@@ -689,8 +681,8 @@ function PlayingToday({ matchup, matchupTeams }: { matchup: MatchupDataType; mat
 						.map(player => {
 							return (
 								<div key={player.id} className="flex flex-col border-b border-gray-300">
-									<div className="inline-block text-xs">
-										{player.PlayerName}
+									<div className="inline-block text-xs">{player.PlayerName}</div>
+									<div className="inline-block">
 										<img
 											src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${
 												player.nhlTeam?.slice(-1)[0]
@@ -698,8 +690,6 @@ function PlayingToday({ matchup, matchupTeams }: { matchup: MatchupDataType; mat
 											alt=""
 											className="inline-block h-4 w-4 mx-1"
 										/>
-									</div>
-									<div className="inline-block">
 										{player.Opp && player.Opp[0] === '@' ? '@' : 'v'}
 										<img
 											src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${
@@ -708,9 +698,7 @@ function PlayingToday({ matchup, matchupTeams }: { matchup: MatchupDataType; mat
 											alt=""
 											className="inline-block h-4 w-4 mx-1"
 										/>
-										{player.Score && (player.Score.includes('AM') || player.Score.includes('PM'))
-											? addHoursToTime({ timeString: player.Score, hoursToAdd: 3 })
-											: player.Score}
+										{player.Score}
 									</div>
 								</div>
 							)
@@ -730,8 +718,8 @@ function PlayingToday({ matchup, matchupTeams }: { matchup: MatchupDataType; mat
 						.map(player => {
 							return (
 								<div key={player.id} className="flex flex-col border-b border-gray-300">
-									<div className="inline-block text-xs">
-										{player.PlayerName}
+									<div className="inline-block text-xs">{player.PlayerName}</div>
+									<div className="inline-block">
 										<img
 											src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${
 												player.nhlTeam?.slice(-1)[0]
@@ -739,8 +727,6 @@ function PlayingToday({ matchup, matchupTeams }: { matchup: MatchupDataType; mat
 											alt=""
 											className="inline-block h-4 w-4 mx-1"
 										/>
-									</div>
-									<div className="inline-block">
 										{player.Opp && player.Opp[0] === '@' ? '@' : 'v'}
 										<img
 											src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${
@@ -749,9 +735,7 @@ function PlayingToday({ matchup, matchupTeams }: { matchup: MatchupDataType; mat
 											alt=""
 											className="inline-block h-4 w-4 mx-1"
 										/>
-										{player.Score && (player.Score.includes('AM') || player.Score.includes('PM'))
-											? addHoursToTime({ timeString: player.Score, hoursToAdd: 3 })
-											: player.Score}
+										{player.Score}
 									</div>
 								</div>
 							)
