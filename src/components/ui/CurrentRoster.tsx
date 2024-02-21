@@ -99,8 +99,8 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 														}`}>
 														{Math.round(+a?.Rating * 100) / 100}
 													</div>
-													<div className={`text-2xs my-1 col-span-3 rounded-xl ${contract?.ExpiryType === 'RFA' ? 'text-orange-700' : ''}`}>
-														{showSalaries && a.ContractEligible && salary > 999999 && moneyFormatter(salary)}
+													<div className={`text-2xs my-1 col-span-3 rounded-xl ${contract?.ExpiryType === 'RFA' ? 'text-orange-700' : ''} ${showSalaries && 'hidden'}`}>
+														{a.ContractEligible && salary > 999999 && moneyFormatter(salary)}
 													</div>
 												</div>
 											)
