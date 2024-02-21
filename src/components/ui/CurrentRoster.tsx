@@ -6,7 +6,7 @@ import { moneyFormatter } from '../../utils/utils'
 import { LoadingSpinner } from './LoadingSpinner'
 
 export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoType; season: SeasonInfoDataType }) {
-	const showSalaries = true
+	const showSalaries = false
 	const salaryData = useSalaryData({}).data
 	const rosterData = useCurrentRoster({ season: season.Season, gshlTeam: teamInfo.id })
 	const contractData = useContractData({ teamID: teamInfo.id })
