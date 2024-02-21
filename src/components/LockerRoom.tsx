@@ -346,7 +346,6 @@ function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 						return <tr></tr>
 					}
 					let originalTeam: TeamInfoType | undefined = undefined
-					console.log(obj)
 					if (obj.originalTeam !== obj.gshlTeam && gshlTeams) {
 						originalTeam = gshlTeams.filter(x => x.id === +obj.originalTeam)[0]
 					}
