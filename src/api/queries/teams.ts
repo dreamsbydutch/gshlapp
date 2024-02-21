@@ -232,7 +232,7 @@ export type TeamDraftPickType = {
 	Rd: number
 	Pick: number
 	gshlTeam: number
-	OriginalTeam: number
+	oariginalTeam: number
 }
 export function useAllFutureDraftPicks(team?: TeamInfoType): TeamDraftPickType[] {
 	const statQueries: TeamDraftPickType[] = useQueries(

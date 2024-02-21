@@ -346,7 +346,8 @@ function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 						return <tr></tr>
 					}
 					let originalTeam: TeamInfoType | undefined = undefined
-					if (obj.OriginalTeam !== obj.gshlTeam && gshlTeams) {
+					console.log(obj)
+					if (obj.originalTeam !== obj.gshlTeam && gshlTeams) {
 						originalTeam = gshlTeams.filter(x => x.id === +obj.OriginalTeam)[0]
 					}
 					if (teamDraftPicks.length - i > currentTeamContracts.length) {
