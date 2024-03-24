@@ -1,7 +1,7 @@
 import { useContractData, useSalaryData } from '../../api/queries/contracts'
 import { TeamInfoType, useCurrentRoster } from '../../api/queries/teams'
 import { SeasonInfoDataType } from '../../api/types'
-import { seasons, upcomingSeasons } from '../../utils/constants'
+import { upcomingSeasons } from '../../utils/constants'
 import { moneyFormatter } from '../../utils/utils'
 import { LoadingSpinner } from './LoadingSpinner'
 

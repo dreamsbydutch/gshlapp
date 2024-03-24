@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { MatchupDataType, useScheduleData } from '../../api/queries/schedule'
 import { useGSHLTeams } from '../../api/queries/teams'
-import { Season } from '../../api/types'
+import { Season, SeasonInfoDataType } from '../../api/types'
 import { LoadingSpinner } from '../ui/LoadingSpinner'
+import { StandingsContainer } from '../Standings'
+import { useStandingsData } from '../../api/queries/standings'
 
 export const PlayoffBracket = ({ seasonID }: { seasonID: Season }) => {
 	const scheduleData = useScheduleData({ season: seasonID, gameType: 'PO' }).data
@@ -39,8 +41,10 @@ export const PlayoffBracket = ({ seasonID }: { seasonID: Season }) => {
 }
 const BracketLine = ({ matchup }: { matchup: MatchupDataType }) => {
 	const gshlTeams = useGSHLTeams({}).data
+	if (!matchup) return <></>
 	const homeTeam = gshlTeams?.filter(obj => obj.id === matchup.HomeTeam)[0]
 	const awayTeam = gshlTeams?.filter(obj => obj.id === matchup.AwayTeam)[0]
+	console.log(matchup)
 	if (!homeTeam && !awayTeam) {
 		return (
 			<div className="flex flex-col m-2 px-2 py-4 text-gray-600 font-bold items-center bg-gray-100 shadow-emboss rounded-2xl shrink-0 min-w-max">
@@ -87,76 +91,60 @@ const BracketLine = ({ matchup }: { matchup: MatchupDataType }) => {
 		</>
 	)
 }
-// export const LosersBracket = ({ seasonID }) => {
-// 	const scheduleData = useQuery(['MainInput', 'Schedule'], queryFunc)
-// 	if (!scheduleData.data) {
-// 		return <LoadingSpinner />
-// 	}
-// 	return (
-// 		<div className=" rounded-xl shadow-md gap-2 bg-brown-200">
-// 			<div className="flex flex-nowrap overflow-scroll whitespace-nowrap py-3">
-// 				<div className="flex flex-col gap-2 place-content-around">
-// 					<LosersGames {...{ seasonID }} />
-// 				</div>
-// 			</div>
-// 			<StandingsContainer {...{ standingsType: 'LT', seasonID }} />
-// 		</div>
-// 	)
-// }
-// const LosersGames = ({ seasonID }) => {
-// 	const scheduleData = useQuery(['MainInput', 'Schedule'], queryFunc)
-// 	if (!scheduleData.data) {
-// 		return <LoadingSpinner />
-// 	}
-// 	return (
-// 		<div className="flex flex-row overflow-auto whitespace-nowrap mt-2 flex-nowrap">
-// 			<div className="mr-12 shrink-0">
-// 				<div className="font-oswald text-left px-4 font-bold text-base">Week 23</div>
-// 				<div className="flex flex-row">
-// 					{scheduleData.data &&
-// 						scheduleData.data
-// 							.filter(obj => obj.Season === seasonID && obj.GameType === 'LT' && +obj.WeekNum === 23)
-// 							.sort((a, b) => a.MatchupNum - b.MatchupNum)
-// 							.map((obj, i) => <BracketLine {...{ matchup: obj }} />)}
-// 				</div>
-// 			</div>
-// 			<div className="mr-12 shrink-0">
-// 				<div className="font-oswald text-left px-4 font-bold text-base">Week 24</div>
-// 				<div className="flex flex-row">
-// 					{scheduleData.data &&
-// 						scheduleData.data
-// 							.filter(obj => obj.Season === seasonID && obj.GameType === 'LT' && +obj.WeekNum === 24)
-// 							.sort((a, b) => a.MatchupNum - b.MatchupNum)
-// 							.map((obj, i) => <BracketLine {...{ matchup: obj }} />)}
-// 				</div>
-// 			</div>
-// 			<div className="">
-// 				<div className="font-oswald text-left px-4 font-bold text-base">Week 25</div>
-// 				<div className="flex flex-row">
-// 					{scheduleData.data &&
-// 						scheduleData.data
-// 							.filter(obj => obj.Season === seasonID && obj.GameType === 'LT' && +obj.WeekNum === 25)
-// 							.sort((a, b) => a.MatchupNum - b.MatchupNum)
-// 							.map((obj, i) => <BracketLine {...{ matchup: obj }} />)}
-// 				</div>
-// 			</div>
-// 		</div>
-// 	)
-// }
-// const LosersStandings = ({ seasonID }) => {
-//   return (
-//           <div>
-//             <div className='font-bold mt-8 text-center text-sm font-varela'>{obj[0]}</div>
-//             <div className={'mb-4 p-2 rounded-xl shadow-md [&>*:last-child]:border-none ' + obj[1]} >
-//               {standings?.filter(obj => obj.LTRk !== '').sort((a, b) => a.LTRk - b.LTRk).map(team => {
-//                 const teamInfo = gshlTeams?.filter(a => a.teamID === team.teamID)[0]
-//                 const teamProb = playoffProb?.filter(a => a.teamID === team.teamID)[0]
-//                 if (!teamInfo || !teamProb) { return <LoadingSpinner /> }
-//                 return (
-//                   <StandingsItem key={team.teamID} {...{ teamInfo, team, teamProb, 'standingsType': props.standingsType }} />
-//                 )
-//               })}
-//             </div>
-//           </div>
-//         )
-// }
+export const LosersBracket = ({ season }: { season: SeasonInfoDataType }) => {
+	const scheduleData = useScheduleData({ season, gameType: 'PO' })
+	if (!scheduleData.data) {
+		return <LoadingSpinner />
+	}
+	return (
+		<div className=" rounded-xl shadow-md gap-2 bg-brown-200">
+			<div className="flex flex-nowrap overflow-scroll whitespace-nowrap py-3">
+				<div className="flex flex-col gap-2 place-content-around">
+					<LosersGames {...{ season }} />
+				</div>
+			</div>
+			<StandingsContainer {...{ standingsType: 'LosersTourney', season, options: { season, OvrRkMin: 13 } }} />
+		</div>
+	)
+}
+const LosersGames = ({ season }: { season: SeasonInfoDataType }) => {
+	const scheduleData = useScheduleData({ season, gameType: 'LT' })
+	if (!scheduleData.data) {
+		return <LoadingSpinner />
+	}
+	console.log(scheduleData)
+	return (
+		<div className="flex flex-row overflow-auto whitespace-nowrap mt-2 flex-nowrap">
+			<div className="mr-12 shrink-0">
+				<div className="font-oswald text-left px-4 font-bold text-base">Week 23</div>
+				<div className="flex flex-row">
+					{scheduleData.data &&
+						scheduleData.data
+							.filter(obj => obj.Season === season.Season && obj.GameType === 'LT' && +obj.WeekNum === 24)
+							.sort((a, b) => a.MatchupNum - b.MatchupNum)
+							.map(obj => <BracketLine {...{ matchup: obj }} />)}
+				</div>
+			</div>
+			<div className="mr-12 shrink-0">
+				<div className="font-oswald text-left px-4 font-bold text-base">Week 24</div>
+				<div className="flex flex-row">
+					{scheduleData.data &&
+						scheduleData.data
+							.filter(obj => obj.Season === season.Season && obj.GameType === 'LT' && +obj.WeekNum === 25)
+							.sort((a, b) => a.MatchupNum - b.MatchupNum)
+							.map(obj => <BracketLine {...{ matchup: obj }} />)}
+				</div>
+			</div>
+			<div className="">
+				<div className="font-oswald text-left px-4 font-bold text-base">Week 25</div>
+				<div className="flex flex-row">
+					{scheduleData.data &&
+						scheduleData.data
+							.filter(obj => obj.Season === season.Season && obj.GameType === 'LT' && +obj.WeekNum === 26)
+							.sort((a, b) => a.MatchupNum - b.MatchupNum)
+							.map(obj => <BracketLine {...{ matchup: obj }} />)}
+				</div>
+			</div>
+		</div>
+	)
+}

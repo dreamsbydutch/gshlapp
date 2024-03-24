@@ -7,7 +7,7 @@ import { LoadingSpinner } from './ui/LoadingSpinner'
 import ErrorPage from '../error'
 import { useSearchParams } from 'react-router-dom'
 import { seasons } from '../utils/constants'
-import { PlayoffBracket } from './pages/Playoffs'
+import { LosersBracket, PlayoffBracket } from './pages/Playoffs'
 
 type StandingsOption = 'Overall' | 'Conference' | 'Wildcard' | 'Playoffs' | 'LosersTourney'
 
@@ -45,7 +45,7 @@ export default function Standings() {
 					<div className="text-2xl text-center py-2 font-bold">GSHL Cup Playoffs</div>
 					<PlayoffBracket {...{ seasonID: season.Season }} />
 					<div className="text-2xl text-center pt-12 pb-2 font-bold">Loser's Tournament</div>
-					{/* <LosersBracket {...{ season }} /> */}
+					<LosersBracket {...{ season }} />
 				</div>
 			)}
 		</div>
@@ -108,7 +108,7 @@ const StandingsToggle = ({ standingsType, season }: { standingsType: StandingsOp
 	)
 }
 
-const StandingsContainer = ({
+export const StandingsContainer = ({
 	standingsType,
 	season,
 	options,
@@ -133,7 +133,7 @@ const StandingsContainer = ({
 	)
 }
 
-const StandingsItem = ({
+export const StandingsItem = ({
 	team,
 	teamProb,
 	season,
@@ -164,7 +164,7 @@ const StandingsItem = ({
 				className="grid grid-cols-12 mx-auto py-1 font-varela text-center items-center border-b border-dotted border-gray-400"
 				onClick={() => setShowInfo(!showInfo)}>
 				<div className="col-span-2 p-1">
-					<img className="w-12" src={String(team.LogoURL)} alt="Team Logo" />
+					<img className="w-12" src={String(teamInfo && teamInfo[0]?.LogoURL)} alt="Team Logo" />
 				</div>
 				<div className="col-span-7 font-bold text-base">{teamInfo && teamInfo[0]?.TeamName}</div>
 				<div className="col-span-2 text-sm">
@@ -354,18 +354,20 @@ const TeamInfo = ({ teamProb, standingsType }: { teamProb: PlayoffProbType; stan
 		case 'LosersTourney':
 			return (
 				<div className="col-span-12 mt-1 mb-3 flex flex-row justify-center flex-wrap">
-					{/* {['1stPickPer', '3rdPickPer', '4thPickPer', '8thPickPer'].map(obj => {
+					{['1stPickPer', '3rdPickPer', '4thPickPer', '8thPickPer'].map(obj => {
 						return (
 							<>
-								{teamProb[obj] && (
+								{teamProb[obj as '1stPickPer' | '3rdPickPer' | '4thPickPer' | '8thPickPer'] && (
 									<div className="flex flex-col gap-1 px-2 border-r border-gray-500 last:border-none">
 										<div className="text-xs font-bold">{obj.replace('Per', '')}</div>
-										<div className="text-xs">{Math.round(teamProb[obj] * 1000) / 10 + '%'}</div>
+										<div className="text-xs">
+											{Math.round(teamProb[obj as '1stPickPer' | '3rdPickPer' | '4thPickPer' | '8thPickPer'] * 1000) / 10 + '%'}
+										</div>
 									</div>
 								)}
 							</>
 						)
-					})} */}
+					})}
 				</div>
 			)
 
