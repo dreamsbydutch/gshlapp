@@ -109,6 +109,7 @@ export const LosersBracket = ({ season }: { season: SeasonInfoDataType }) => {
 }
 const LosersGames = ({ season }: { season: SeasonInfoDataType }) => {
 	const scheduleData = useScheduleData({ season, gameType: 'LT' })
+
 	if (!scheduleData.data) {
 		return <LoadingSpinner />
 	}
