@@ -112,7 +112,6 @@ const LosersGames = ({ season }: { season: SeasonInfoDataType }) => {
 	if (!scheduleData.data) {
 		return <LoadingSpinner />
 	}
-	console.log(scheduleData)
 	return (
 		<div className="flex flex-row overflow-auto whitespace-nowrap mt-2 flex-nowrap">
 			<div className="mr-12 shrink-0">
