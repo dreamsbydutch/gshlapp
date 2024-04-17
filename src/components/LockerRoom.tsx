@@ -350,6 +350,7 @@ function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 						originalTeam = gshlTeams.filter(x => x.id === +obj.originalTeam)[0]
 					}
 					if (teamDraftPicks.length - i > currentTeamContracts.length) {
+						console.log(obj.Pick,Number.isInteger(obj.Pick))
 						return (
 							<div key={i + 1} className="text-gray-800">
 								<div className="mx-auto w-5/6 py-1 px-2 text-center text-xs border-t border-gray-300">
