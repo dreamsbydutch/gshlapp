@@ -169,7 +169,7 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 						moneyFormatter(
 							upcomingSeasons[0].SalaryCap -
 								contractData.data
-									?.filter(obj => obj.StartDate < upcomingSeasons[0].PlayoffEndDate && +obj.YearsRemaining >= 1)
+									?.filter(obj => obj.StartDate < upcomingSeasons[0].PlayoffEndDate && +obj.YearsRemaining >= 0)
 									.reduce((prev, curr) => (prev += curr.CapHit), 0)
 						)}
 				</div>
