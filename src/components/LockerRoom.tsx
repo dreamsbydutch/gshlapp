@@ -224,7 +224,7 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 			{seasons.slice(-1)[0].PlayoffEndDate > new Date() && player.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +player.YearsRemaining > -1 ? (
 				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{moneyFormatter(player.CapHit)}</td>
 			) : (
-				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300"></td>
+				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{moneyFormatter(player.CapHit)}</td>
 			)}
 			{+player.YearsRemaining > 0 ? (
 				<td className="py-1 px-2 text-center text-xs border-t border-b border-gray-300">{moneyFormatter(player.CapHit)}</td>
