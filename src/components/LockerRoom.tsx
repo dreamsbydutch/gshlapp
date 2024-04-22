@@ -205,13 +205,7 @@ function TeamPlayerContracts({ teamInfo }: { teamInfo: TeamInfoType }) {
 }
 function PlayerContractTable({ contracts, team }: { contracts: PlayerContractType[]; team: TeamInfoType | undefined }) {
 	const gshlTeams = useGSHLTeams({ season: getSeason() }).data
-	const PlayerContractRow = ({ player, team }: { player: PlayerContractType; team: TeamInfoType | undefined }) => {
-		console.log(contracts)
-		console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date() && player.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +player.YearsRemaining > -1)
-		console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date())
-		console.log(player.StartDate < seasons.slice(-1)[0].PlayoffEndDate)
-		console.log(+player.YearsRemaining > -1)
-		return (
+	const PlayerContractRow = ({ player, team }: { player: PlayerContractType; team: TeamInfoType | undefined }) => (
 		<tr key={player.id} className={`${player.ExpiryType === 'Buyout' ? 'text-gray-400' : 'text-gray-800'}`}>
 			<td className="sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50">
 				{player.PlayerName}
@@ -285,7 +279,14 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 				</tr>
 			</thead>
 			<tbody>
-				{contracts?.sort((a, b) => +b.CapHit - +a.CapHit).map(obj => (obj ? <PlayerContractRow {...{ player: obj, team: team }} /> : <tr></tr>))}
+				{contracts?.sort((a, b) => +b.CapHit - +a.CapHit).map(obj => {
+						console.log(contracts)
+						console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date() && obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +obj.YearsRemaining > -1)
+						console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date())
+						console.log(obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate)
+						console.log(+obj.YearsRemaining > -1)
+						return (obj ? <PlayerContractRow {...{ player: obj, team: team }} /> : <tr></tr>)
+				})}
 				{team && (
 					<tr key={`${team.TeamName}CapSpace`}>
 						<td className="sticky left-0 font-bold py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200">Cap Space</td>
