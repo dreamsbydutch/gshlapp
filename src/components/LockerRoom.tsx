@@ -205,7 +205,13 @@ function TeamPlayerContracts({ teamInfo }: { teamInfo: TeamInfoType }) {
 }
 function PlayerContractTable({ contracts, team }: { contracts: PlayerContractType[]; team: TeamInfoType | undefined }) {
 	const gshlTeams = useGSHLTeams({ season: getSeason() }).data
-	const PlayerContractRow = ({ player, team }: { player: PlayerContractType; team: TeamInfoType | undefined }) => (
+	const PlayerContractRow = ({ player, team }: { player: PlayerContractType; team: TeamInfoType | undefined }) => {
+		console.log(contracts)
+		console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date() && player.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +player.YearsRemaining > -1)
+		console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date())
+		console.log(player.StartDate < seasons.slice(-1)[0].PlayoffEndDate)
+		console.log(+player.YearsRemaining > -1)
+		return (
 		<tr key={player.id} className={`${player.ExpiryType === 'Buyout' ? 'text-gray-400' : 'text-gray-800'}`}>
 			<td className="sticky left-0 py-1 px-2 text-center text-xs border-t border-b border-gray-300 whitespace-nowrap bg-gray-50">
 				{player.PlayerName}
@@ -263,11 +269,6 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 			)}
 		</tr>
 	)
-	console.log(contracts)
-	console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date() && player.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +player.YearsRemaining > -1)
-	console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date())
-	console.log(player.StartDate < seasons.slice(-1)[0].PlayoffEndDate)
-	console.log(+player.YearsRemaining > -1)
 	return (
 		<table className="mx-auto my-1 overflow-x-auto">
 			<thead>
