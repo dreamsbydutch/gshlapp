@@ -289,7 +289,7 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 							{moneyFormatter(
 								seasons.slice(-1)[0].SalaryCap -
 									contracts
-										?.filter(obj => obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate && obj.YearsRemaining >= 0)
+										?.filter(obj => obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +obj.YearsRemaining >= -1)
 										.reduce((acc, obj) => acc + +obj.CapHit, 0)
 							)}
 						</td>
