@@ -264,6 +264,7 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 			)}
 		</tr>
 	)
+	console.log(contracts)
 	return (
 		<table className="mx-auto my-1 overflow-x-auto">
 			<thead>
