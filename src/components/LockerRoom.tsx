@@ -279,14 +279,7 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 				</tr>
 			</thead>
 			<tbody>
-				{contracts?.sort((a, b) => +b.CapHit - +a.CapHit).map(obj => {
-						console.log(obj)
-						console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date() && obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +obj.YearsRemaining > -1)
-						console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date())
-						console.log(obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate)
-						console.log(+obj.YearsRemaining > -1)
-						return (obj ? <PlayerContractRow {...{ player: obj, team: team }} /> : <tr></tr>)
-				})}
+				{contracts?.sort((a, b) => +b.CapHit - +a.CapHit).map(obj => (obj ? <PlayerContractRow {...{ player: obj, team: team }} /> : <tr></tr>))}
 				{team && (
 					<tr key={`${team.TeamName}CapSpace`}>
 						<td className="sticky left-0 font-bold py-1 px-2 text-center text-xs border-t border-gray-800 bg-gray-200">Cap Space</td>
