@@ -280,7 +280,7 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 			</thead>
 			<tbody>
 				{contracts?.sort((a, b) => +b.CapHit - +a.CapHit).map(obj => {
-						console.log(contracts)
+						console.log(obj)
 						console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date() && obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate && +obj.YearsRemaining > -1)
 						console.log(seasons.slice(-1)[0].PlayoffEndDate > new Date())
 						console.log(obj.StartDate < seasons.slice(-1)[0].PlayoffEndDate)
