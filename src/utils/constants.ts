@@ -117,8 +117,8 @@ export const seasons: Array<SeasonInfoDataType> = [
 			[2, 2, 2, 3, 1, 1, 4, 1, 1],
 		],
 		Categories: ['G', 'A', 'P', 'PPP', 'SOG', 'HIT', 'BLK', 'W', 'GAA', 'SVP'],
-		PlayerData: '',
-		TeamData: '',
+		PlayerData: '1Apl3wxvLhb08tuPLoZbeFAiVftcxPzwvgaySBGIzFZQ',
+		TeamData: '1krxDmexEl_i6sqswiWUqaoynzwPUk5CFc1ZJ_R3DrAQ',
 		SalaryCap: 25000000,
 	},
 ]
