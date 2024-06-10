@@ -56,7 +56,6 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 	if (!salaryData || !currentRoster || !teamInfo) {
 		return <LoadingSpinner />
 	}
-	console.log(rosterData)
 	return (
 		<>
 			<div className="mt-12 text-center mx-auto text-xl font-bold">Current Roster</div>
