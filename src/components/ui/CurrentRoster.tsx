@@ -103,7 +103,7 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 														className={`text-2xs my-1 col-span-3 rounded-xl ${contract?.ExpiryType === 'RFA' ? 'text-orange-700' : ''} ${
 															!showSalaries && 'hidden'
 														}`}>
-														{a.ContractEligible && salary > 999999 && moneyFormatter(salary)}
+														{a.ContractEligible === 'TRUE' && salary > 999999 && moneyFormatter(salary)}
 													</div>
 												</div>
 											)
@@ -153,7 +153,7 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 											className={`text-2xs my-1 col-span-3 rounded-xl ${contract?.ExpiryType === 'RFA' ? 'text-orange-700' : ''} ${
 												!showSalaries && 'hidden'
 											}`}>
-											{obj.ContractEligible && salary > 999999 && moneyFormatter(salary)}
+											{obj.ContractEligible === 'TRUE' && salary > 999999 && moneyFormatter(salary)}
 										</div>
 									</div>
 								)

@@ -89,7 +89,7 @@ export type PlayerSalaryType = Omit<PlayerInfoType, 'WeekType' | 'nhlTeam' | 'PP
 }
 export type PlayerCurrentRosterType = Omit<PlayerInfoType, 'WeekType' | 'Age' | 'PPD' | 'MG' | 'GP' | 'GS' | 'MS' | 'BS'> & {
 	Rank: number
-	ContractEligible: boolean
+	ContractEligible: 'TRUE' | 'FALSE'
 	LineupPos: 'C' | 'LW' | 'RW' | 'D' | 'G' | 'Util' | 'BN' | 'IR+' | 'IR'
 }
 export type PlayerDraftPickType = {
