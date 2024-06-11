@@ -317,7 +317,7 @@ function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 	const gshlTeams = useGSHLTeams({}).data
 	const draftPickData: TeamDraftPickType[] = useAllFutureDraftPicks(teamInfo || undefined)
 	const currentTeamContracts = useContractData({ date: new Date(), teamID: teamInfo?.id })
-		.data?.filter(obj => +obj.YearsRemaining > 0 && obj.ExpiryType !== 'Buyout')
+		.data?.filter(obj => +obj.YearsRemaining >= 0 && obj.ExpiryType !== 'Buyout')
 		.sort((a, b) => b.CapHit - a.CapHit)
 	const numberSuffix = (num: number) => {
 		num = num < 20 ? num : num % 10

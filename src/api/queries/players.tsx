@@ -409,7 +409,7 @@ export function usePlayerDays(options: PlayerDayOptions) {
 }
 
 export function useAllPastDraftPicks(team?: TeamInfoType): PlayerDraftPickType[] {
-	let statQueries: PlayerDraftPickType[] = useQueries(
+	const statQueries: PlayerDraftPickType[] = useQueries(
 		seasons
 			.filter(season => season.SeasonStartDate < new Date())
 			.map(season => {
