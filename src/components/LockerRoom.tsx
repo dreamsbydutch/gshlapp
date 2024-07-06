@@ -12,7 +12,7 @@ import {
 	useGSHLTeams,
 } from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
-import { getSeason, moneyFormatter } from '../utils/utils'
+import { formatYears, getSeason, moneyFormatter } from '../utils/utils'
 import { PlayerContractType, useContractData } from '../api/queries/contracts'
 import updateSearchParams from '../utils/updateSearchParams'
 import { usePlayerSplits, usePlayerTotals } from '../api/queries/players'
@@ -1054,15 +1054,31 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 		'GM of the Year',
 		'Coach of the Year',
 		'Calder Winner',
-		'Norris WInner',
+		'Norris Winner',
 		'Vezina Winner',
 		'Art Ross Winner',
 		'Rocket Richard Winner',
 		'Selke Winner',
 		'Lady Byng Winner',
 	]
-	const awardSorted = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map(obj => {
-		return awardData.filter(a => a.id === obj)
+	const awardSorted = [
+		'Cup',
+		'President',
+		'TwoSevenSix',
+		'UnitFour',
+		'Loser',
+		'Hart',
+		'GMOY',
+		'JackAdams',
+		'Calder',
+		'Norris',
+		'Vezina',
+		'ArtRoss',
+		'Rocket',
+		'Selke',
+		'LadyByng',
+	].map(obj => {
+		return awardData.filter(a => a.Award === obj).sort((a, b) => b.Season - a.Season)
 	})
 	return (
 		<div className="flex flex-row gap-4 mx-2 flex-wrap justify-center">
@@ -1077,23 +1093,23 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 						)
 					return (
 						<div className={i === 0 ? '' : i < 5 ? 'text-xs' : 'text-2xs'}>
-							{obj.length}-time {awards[i]}
+							{obj.length}-time {awards[i]} ({formatYears(obj.map(a => a.Season))})
 						</div>
 					)
 				})}
 			</div>
-			{awardData.map(obj => (
-				<TrophyDisplay {...{ trophyID: obj.id, season: obj.Season, teamStats: obj, teamInfo }} />
+			{awardSorted.flat().map(obj => (
+				<TrophyDisplay {...{ trophyID: obj.Award, season: obj.Season, teamStats: obj, teamInfo }} />
 			))}
 		</div>
 	)
 }
 
-function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; season: Season; teamStats: TeamAwardType }) {
+function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; season: Season; teamStats: TeamAwardType }) {
 	const teamInfo = useGSHLTeams({ teamID: teamStats.gshlTeam }).data
 	if (!teamInfo) return <></>
 	switch (trophyID) {
-		case 1:
+		case 'Cup':
 			return (
 				<div className="flex flex-col w-28 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/qqvph7Y4/gshlCup.jpg')]">
@@ -1104,7 +1120,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 2:
+		case 'President':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/1XDpbZwq/presidents-trophy.png')]">
@@ -1115,7 +1131,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 3:
+		case 'TwoSevenSix':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/PJZ3bg7J/276.png')]">
@@ -1126,7 +1142,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 4:
+		case 'UnitFour':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/wMh2Rhts/unit4.jpg')]">
@@ -1137,7 +1153,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 5:
+		case 'Loser':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/vHbvVcWF/losers.jpg')]">
@@ -1148,7 +1164,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 6:
+		case 'Hart':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/Yqht1cJp/Hart.jpg')]">
@@ -1159,7 +1175,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 7:
+		case 'GMOY':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gJH93py2/gmofyear.jpg')]">
@@ -1170,7 +1186,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 8:
+		case 'JackAdams':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/QCdQSg7W/Jack-Adams.jpg')]">
@@ -1181,7 +1197,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 9:
+		case 'Calder':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/k5nSMXpJ/calder.jpg')]">
@@ -1192,7 +1208,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 10:
+		case 'Norris':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/Y0SMnT0z/norris.jpg')]">
@@ -1203,7 +1219,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 11:
+		case 'Vezina':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/DZ67c7vz/vezina.jpg')]">
@@ -1214,7 +1230,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 12:
+		case 'ArtRoss':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gcMYXctS/Art-Ross.jpg')]">
@@ -1225,7 +1241,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 13:
+		case 'Rocket':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/NFP9p6sL/Rocket-Richard.jpg')]">
@@ -1236,7 +1252,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 14:
+		case 'Selke':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/vH4N00PL/selke.jpg')]">
@@ -1247,7 +1263,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: number; seas
 				</div>
 			)
 			break
-		case 15:
+		case 'LadyByng':
 			return (
 				<div className="flex flex-col w-20 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gk1BQ3Q9/lady-byng.png')]">

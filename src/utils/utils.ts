@@ -86,3 +86,34 @@ export function useCurrentWeek() {
 	const currentWeek = weeks.data?.filter(obj => formatDate(obj.StartDate) <= formatDate(date) && formatDate(obj.EndDate) >= formatDate(date))[0]
 	return currentWeek
 }
+export function formatYears(years:number[]) {
+	if (!years.length) return "";
+  
+	years.sort((a, b) => a - b); // Ensure the years are sorted
+  
+	let result = "";
+	let start = years[0];
+	let end = years[0];
+  
+	for (let i = 1; i < years.length; i++) {
+		if (years[i] === end + 1) {
+			end = years[i];
+		} else {
+			if (start === end) {
+				result += `${start}, `;
+			} else {
+				result += `${start}-${end}, `;
+			}
+			start = years[i];
+			end = years[i];
+		}
+	}
+  
+	if (start === end) {
+		result += `${start}`;
+	} else {
+		result += `${start}-${end}`;
+	}
+  
+	return result;
+  }

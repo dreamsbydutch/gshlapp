@@ -464,3 +464,15 @@ export function useTradeBlock(options: TradeBlockOptions) {
 	}
 	return { data: tradeBlockData }
 }
+
+export function usePlayerSalaries() {
+	const season: SeasonInfoDataType = seasons.slice(-2)[0]
+	const queryKey = [String(season.Season), 'PlayerData', 'Salaries']
+	const salaries = useQuery(queryKey, queryFunc)
+	if (salaries.isLoading) return { loading: true }
+	if (salaries.isError) return { error: salaries.error }
+	if (!salaries.isSuccess) return { error: salaries }
+	console.log(salaries.data, queryKey)
+	const salaryData: PlayerSalaryType[] = salaries.data
+	return { data: salaryData }
+}
