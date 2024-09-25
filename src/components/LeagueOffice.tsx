@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { SetURLSearchParams, useSearchParams } from 'react-router-dom'
-import { seasons } from '../utils/constants'
+import { seasons } from '../lib/constants'
 import { TeamInfoType, useGSHLTeams } from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
-import { PageToolbarPropsType } from '../utils/types'
-import { PageToolbar, SecondaryPageToolbar } from './ui/PageNavBar'
+import { PageToolbarPropsType, SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../lib/types'
+import { PageToolbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
 import {
 	PlayerNHLType,
 	PlayerSeasonType,
@@ -14,15 +14,31 @@ import {
 	usePlayerSalaries,
 	useTradeBlock,
 } from '../api/queries/players'
-import { moneyFormatter } from '../utils/utils'
+import { getSeason, moneyFormatter } from '../lib/utils'
 import { PlayerContractType, useContractData } from '../api/queries/contracts'
 import Rulebook from './pages/Rulebook'
+import { DraftBoardDataType, DraftOrderDataType, useDraftBoardData } from '../api/queries/draftboard'
+import { SearchBar } from './search-bar'
+import { Input } from './ui/input'
+import { Button } from './ui/button'
 
-type LeagueOfficePagesType = 'Rulebook' | 'Free Agency' | 'History' | 'Trade Block'
+type LeagueOfficePagesType = 'Rulebook' | 'Free Agency' | 'Draft List' | 'Draft Board' | 'History' | 'Trade Block'
+type NHLPositions = 'Any' | 'Fwd' | 'C' | 'Wing' | 'LW' | 'RW' | 'D' | 'G'
 
 export default function LeagueOffice() {
+	const season = seasons.slice(-1)[0]
 	const [searchParams, setSearchParams] = useSearchParams()
 	const leagueOfficePage: LeagueOfficePagesType = searchParams.get('pgType') as LeagueOfficePagesType
+	const position: NHLPositions = searchParams.get('position') as NHLPositions
+	const currentTeamData = useGSHLTeams({ season, teamID: Number(searchParams.get('teamID')) }).data
+	if (!currentTeamData) return <LoadingSpinner />
+	const currentTeam = searchParams.get('teamID') ? currentTeamData[0] : undefined
+
+	const teamsToggleProps: TeamsTogglePropsType = {
+		activeKey: currentTeam,
+		paramState: [searchParams, setSearchParams],
+		teamOptions: { season },
+	}
 
 	const pageToolbarProps: PageToolbarPropsType = {
 		activeKey: leagueOfficePage,
@@ -30,15 +46,57 @@ export default function LeagueOffice() {
 		toolbarKeys: [
 			{ key: 'pgType', value: 'Rulebook' },
 			{ key: 'pgType', value: 'Free Agency' },
+			{ key: 'pgType', value: 'Draft Board' },
+			{ key: 'pgType', value: 'Draft List' },
 			// { key: 'pgType', value: 'History' },
 			// { key: 'pgType', value: 'Trade Block' },
 		],
 	}
+
+	const draftBoardToolbarProps: SecondaryPageToolbarPropsType = {
+		activeKey: position,
+		paramState: [searchParams, setSearchParams],
+		toolbarKeys: [
+			{ key: 'position', value: 'Any' },
+			{ key: 'position', value: 'Fwd' },
+			{ key: 'position', value: 'Wing' },
+			{ key: 'position', value: 'C' },
+			{ key: 'position', value: 'LW' },
+			{ key: 'position', value: 'RW' },
+			{ key: 'position', value: 'D' },
+			{ key: 'position', value: 'G' },
+		],
+	}
+
 	return (
 		<div className="my-4 text-center">
-			<PageToolbar {...pageToolbarProps} />
-			{leagueOfficePage === 'Rulebook' && <Rulebook />}
-			{leagueOfficePage === 'Free Agency' && <PlayerSalaries />}
+			{!leagueOfficePage && <PageToolbar {...pageToolbarProps} />}
+			{leagueOfficePage === 'Rulebook' && (
+				<>
+					<PageToolbar {...pageToolbarProps} />
+					<Rulebook />
+				</>
+			)}
+			{leagueOfficePage === 'Free Agency' && (
+				<>
+					<PageToolbar {...pageToolbarProps} />
+					<PlayerSalaries />
+				</>
+			)}
+			{leagueOfficePage === 'Draft Board' && (
+				<>
+					<SecondaryPageToolbar {...pageToolbarProps} />
+					<TeamsToggle {...teamsToggleProps} />
+					<DraftBoard {...{ searchParams }} />
+				</>
+			)}
+			{leagueOfficePage === 'Draft List' && (
+				<>
+					<SecondaryPageToolbar {...pageToolbarProps} />
+					<PageToolbar {...draftBoardToolbarProps} />
+					<DraftList {...{ searchParams }} />
+				</>
+			)}
 			{/* {leagueOfficePage === 'Trade Block' && <TradeBlock {...{ searchParams, setSearchParams }} />} */}
 		</div>
 	)
@@ -399,5 +457,289 @@ function PlayerSalaries() {
 				)
 			})}
 		</div>
+	)
+}
+
+function DraftList({ searchParams }: { searchParams: any }) {
+	const { data } = useDraftBoardData({})
+	if (!data) return null
+	const teamID = +searchParams.get('teamID')
+	const teamData = useGSHLTeams({ teamID })
+	const remainingPicks = data.draftorder.filter(obj => obj.teamID === teamID && !obj.Player)
+	const currentPick = Math.min(...data.draftorder.map(obj => (obj.signing === 'Yes' || obj.Player ? 300 : obj.Pick)))
+	let draftboard = data?.draftboard?.filter(obj => !obj.Pick)
+	const position = searchParams.get('position')
+	const [searchItem, setSearchItem] = useState<string>('')
+	const [filteredDraftBoard, setFilteredDraftBoard] = useState<DraftBoardDataType[] | undefined>(draftboard)
+	let inputHandler = (e: any) => {
+		const searchTerm = e.target.value
+		setSearchItem(searchTerm)
+		const filteredItems = draftboard?.filter(obj => obj.Player.toLowerCase().includes(searchTerm.toLowerCase()))
+
+		setFilteredDraftBoard(filteredItems)
+	}
+	let x: DraftBoardDataType[]
+
+	switch (position) {
+		case 'Fwd':
+			x = draftboard?.filter(obj => obj.Pos1 !== 'D' && obj.Pos1 !== 'G')
+			setFilteredDraftBoard(x)
+			break
+		case 'Wing':
+			x = draftboard?.filter(
+				obj => obj.Pos1 === 'LW' || obj.Pos1 === 'RW' || obj.Pos2 === 'LW' || obj.Pos2 === 'RW' || obj.Pos3 === 'LW' || obj.Pos3 === 'RW'
+			)
+			setFilteredDraftBoard(x)
+			break
+		case 'C':
+			x = draftboard?.filter(obj => obj.Pos1 === 'C' || obj.Pos2 === 'C' || obj.Pos3 === 'C')
+			setFilteredDraftBoard(x)
+			break
+		case 'LW':
+			x = draftboard?.filter(obj => obj.Pos1 === 'LW' || obj.Pos2 === 'LW' || obj.Pos3 === 'LW')
+			setFilteredDraftBoard(x)
+			break
+		case 'RW':
+			x = draftboard?.filter(obj => obj.Pos1 === 'RW' || obj.Pos2 === 'RW' || obj.Pos3 === 'RW')
+			setFilteredDraftBoard(x)
+			break
+		case 'D':
+			x = draftboard?.filter(obj => obj.Pos1 === 'D')
+			setFilteredDraftBoard(x)
+			break
+		case 'G':
+			x = draftboard?.filter(obj => obj.Pos1 === 'G')
+			setFilteredDraftBoard(x)
+			break
+		case 'Any':
+		default:
+			break
+	}
+	return (
+		<>
+			<div className="font-bold text-2xl">Eligible Players</div>
+			<div className="text-yellow-800 mb-6">
+				{teamData.data && remainingPicks[0] && `${teamData.data[0].TeamName} are on the clock in ${remainingPicks[0].Pick - currentPick + 1} picks`}
+			</div>
+
+			<div className="flex w-full max-w-sm items-center space-x-2 my-2">
+				<Input onChange={inputHandler} value={searchItem} type="search" placeholder="Search..." />
+			</div>
+
+			<div className="grid grid-cols-7 mx-2 font-bold text-sm">
+				<div className="">Rank</div>
+				<div className="col-span-3">Player</div>
+				<div className="">Pos</div>
+				<div className="">Yahoo</div>
+				<div className="">ESPN</div>
+			</div>
+			{filteredDraftBoard?.map(obj => (
+				<EligibleDraftPlayer player={obj} key={obj.Player} />
+			))}
+		</>
+	)
+}
+function EligibleDraftPlayer({ player }: { player: DraftBoardDataType }) {
+	const [showStats, setShowStats] = useState<Boolean>(false)
+	return (
+		<div onClick={() => setShowStats(!showStats)} className="border-b border-dotted border-slate-400">
+			<div className="grid grid-cols-7 mx-2 justify-center items-center my-0.5">
+				<div className="">{player.Rank}</div>
+				<div className="col-span-3">{player.Player}</div>
+				<div className="">{player.Pos1 + (player.Pos2 ? ',' + player.Pos2 : '') + (player.Pos3 ? ',' + player.Pos3 : '')}</div>
+				<div className="">{player.Yahoo}</div>
+				<div className="">{player.ESPN}</div>
+			</div>
+			{showStats && (
+				<div className="mx-2 mb-6 mt-1">
+					<div className="flex justify-around w-8/12 mx-auto mb-2 text-sm">
+						<div className="">
+							<img
+								src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${player.Team}.png`}
+								alt="NHL Team Logo"
+								className="h-6 w-6 mx-auto"
+							/>
+						</div>
+						<div className="">{player.Age} y/o</div>
+						<div className="">{moneyFormatter(player.Salary)}</div>
+					</div>
+					<div className="grid grid-cols-10 mx-4 font-bold text-xs">
+						<div className="col-span-3"></div>
+						<div>G</div>
+						<div>A</div>
+						<div>P</div>
+						<div>PPP</div>
+						<div>SOG</div>
+						<div>HIT</div>
+						<div>BLK</div>
+					</div>
+					<div className="grid grid-cols-10 mx-4 text-sm my-0.5">
+						<div className="col-span-3">23/24 Stats</div>
+						<div>{player.PrevG}</div>
+						<div>{player.PrevA}</div>
+						<div>{player.PrevP}</div>
+						<div>{player.PrevPPP}</div>
+						<div>{player.PrevSOG}</div>
+						<div>{player.PrevHIT}</div>
+						<div>{player.PrevBLK}</div>
+					</div>
+					<div className="grid grid-cols-10 mx-4 text-sm my-0.5">
+						<div className="col-span-3">24/25 Proj</div>
+						<div>{player.ProjG}</div>
+						<div>{player.ProjA}</div>
+						<div>{player.ProjP}</div>
+						<div>{player.ProjPPP}</div>
+						<div>{player.ProjSOG}</div>
+						<div>{player.ProjHIT}</div>
+						<div>{player.ProjBLK}</div>
+					</div>
+				</div>
+			)}
+		</div>
+	)
+}
+
+function DraftBoard({ searchParams }: { searchParams: any }) {
+	const { data } = useDraftBoardData({})
+	if (!data) return null
+	const teamID = +searchParams.get('teamID')
+	const teamData = useGSHLTeams({ teamID })
+	const draftOrder = data.draftorder.filter(obj => obj.teamID === teamID && !!obj.Player)
+	const remainingPicks = data.draftorder.filter(obj => obj.teamID === teamID && !obj.Player)
+	const currentPick = Math.min(...data.draftorder.map(obj => (obj.signing === 'Yes' || obj.Player ? 300 : obj.Pick)))
+	console.log(currentPick)
+	const numberSuffix = (num: number) => {
+		num = num < 20 ? num : num % 10
+		switch (num) {
+			case 1:
+				return 'st'
+			case 2:
+				return 'nd'
+			case 3:
+				return 'rd'
+			default:
+				return 'th'
+		}
+	}
+	if (!draftOrder) return <LoadingSpinner />
+	return (
+		<>
+			<div>Draft Board</div>
+			<div className="text-yellow-800">
+				{teamData.data && remainingPicks[0] && `${teamData.data[0].TeamName} are on the clock in ${remainingPicks[0].Pick - currentPick + 1} picks`}
+			</div>
+			<DraftRoster roster={draftOrder} data={data} />
+			<div className="mt-6 mb-2 text-center mx-auto text-xl font-bold">Remaining Picks</div>
+
+			{remainingPicks?.map((pick, i) => (
+				<div>
+					{`${pick.Round + numberSuffix(+pick.Round)} Round${
+						Number.isInteger(+pick.Pick) ? ', ' + pick.Pick + numberSuffix(+pick.Pick) + ' Overall' : ''
+					}`}
+				</div>
+			))}
+		</>
+	)
+}
+function DraftRoster({
+	roster,
+	data,
+}: {
+	roster: DraftOrderDataType[]
+	data:
+		| {
+				draftboard: DraftBoardDataType[]
+				draftorder: DraftOrderDataType[]
+		  }
+		| undefined
+}) {
+	const teamLineup = [
+		[
+			[
+				roster?.filter(obj => obj.TeamPos === 'LW01')[0],
+				roster?.filter(obj => obj.TeamPos === 'C01')[0],
+				roster?.filter(obj => obj.TeamPos === 'RW01')[0],
+			],
+			[
+				roster?.filter(obj => obj.TeamPos === 'LW02')[0],
+				roster?.filter(obj => obj.TeamPos === 'C02')[0],
+				roster?.filter(obj => obj.TeamPos === 'RW02')[0],
+			],
+			[null, null, roster?.filter(obj => obj.TeamPos === 'Util01')[0], null, null],
+		],
+		[
+			[null, roster?.filter(obj => obj.TeamPos === 'D01')[0], roster?.filter(obj => obj.TeamPos === 'D02')[0], null],
+			[null, null, roster?.filter(obj => obj.TeamPos === 'D03')[0], null, null],
+		],
+		[[null, null, roster?.filter(obj => obj.TeamPos === 'G01')[0], null, null]],
+	]
+	const currentRoster = [
+		roster?.filter(obj => obj.TeamPos === 'BN01')[0],
+		roster?.filter(obj => obj.TeamPos === 'BN02')[0],
+		roster?.filter(obj => obj.TeamPos === 'BN03')[0],
+		roster?.filter(obj => obj.TeamPos === 'BN04')[0],
+		roster?.filter(obj => obj.TeamPos === 'BN05')[0],
+	].filter(Boolean)
+	console.log(currentRoster)
+	return (
+		<>
+			<div className="mt-12 text-center mx-auto text-xl font-bold">Draft Roster</div>
+			<div className="flex flex-col max-w-md mx-auto border rounded-xl bg-gray-50">
+				{teamLineup.map(x => {
+					return (
+						<>
+							{x.map((obj, i) => {
+								return (
+									<div key={i} className="grid grid-cols-6 items-center py-2">
+										{obj.map((a, j) => {
+											if (!a) {
+												return <div></div>
+											}
+											const playerData = data?.draftboard.filter(obj => obj.Player === a.Player)[0]
+											return (
+												<div key={j} className="grid grid-cols-2 col-span-2 text-center px-2">
+													<div className="col-span-3 text-sm">{a.Player}</div>
+													<div className="text-2xs">{playerData?.Position}</div>
+													<div>
+														<img
+															src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${playerData?.Team}.png`}
+															alt="NHL Team Logo"
+															className="h-4 w-4 mx-auto"
+														/>
+													</div>
+												</div>
+											)
+										})}
+									</div>
+								)
+							})}
+							<span className="border-b"></span>
+						</>
+					)
+				})}
+			</div>
+			{currentRoster.length > 0 ? (
+				<div className="flex flex-col max-w-md mx-auto border rounded-xl bg-brown-50 mt-2">
+					<div className="grid grid-cols-2 items-center my-2 mx-2">
+						{currentRoster.map((obj, i) => {
+							const playerData = data?.draftboard.filter(a => obj.Player === a.Player)[0]
+							return (
+								<div key={i} className="grid grid-cols-2 text-center px-2 my-2">
+									<div className="col-span-3 text-sm">{obj?.Player}</div>
+									<div className="text-2xs">{playerData?.Position}</div>
+									<div>
+										<img
+											src={`https://raw.githubusercontent.com/dreamsbydutch/gshl/main/public/assets/Logos/nhlTeams/${playerData?.Team}.png`}
+											alt="NHL Team Logo"
+											className="h-4 w-4 mx-auto"
+										/>
+									</div>
+								</div>
+							)
+						})}
+					</div>
+				</div>
+			) : null}
+		</>
 	)
 }

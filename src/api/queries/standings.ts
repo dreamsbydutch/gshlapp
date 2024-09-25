@@ -1,23 +1,23 @@
-import { useQuery } from "react-query";
-import { queryFunc } from "../fetch";
-import { SeasonInfoDataType } from "../types";
-import { formatStandings } from "../formatters";
-import { getSeason } from "../../utils/utils";
+import { useQuery } from 'react-query'
+import { queryFunc } from '../fetch'
+import { SeasonInfoDataType } from '../types'
+import { formatStandings } from '../formatters'
+import { getSeason } from '../../lib/utils'
 
 export type StandingsQueryOptions = {
-    season: SeasonInfoDataType | number
-    conf?: string
-    teamID?: number
-    ownerID?: number
-    OvrRkMax?: number
-    OvrRkMin?: number
-    CCRkMax?: number
-    CCRkMin?: number
-    WCRkMax?: number
-    WCRkMin?: number
-    LTRkMax?: number
-    LTRkMin?: number
-    POFinish?: string
+	season: SeasonInfoDataType | number
+	conf?: string
+	teamID?: number
+	ownerID?: number
+	OvrRkMax?: number
+	OvrRkMin?: number
+	CCRkMax?: number
+	CCRkMin?: number
+	WCRkMax?: number
+	WCRkMin?: number
+	LTRkMax?: number
+	LTRkMin?: number
+	POFinish?: string
 }
 export type StandingsInfoType = {
 	Season: SeasonInfoDataType
@@ -69,52 +69,54 @@ export type StandingsInfoType = {
 	DraftPtsAdj: number | null
 }
 
-export function useStandingsData (options: StandingsQueryOptions) {
+export function useStandingsData(options: StandingsQueryOptions) {
 	const season: SeasonInfoDataType = typeof options.season === 'number' ? getSeason(options.season) : options.season
-    const queryKey = [String(season.Season), 'TeamData', 'Standings']
-	const stdg = useQuery(queryKey,queryFunc)
-    if (stdg.isLoading) return {'loading':true}
-    if (stdg.isError) return {'error':stdg.error}
-    if (!stdg.isSuccess) return {'error':stdg}
-    let stdgData: StandingsInfoType[] = stdg.data.map((obj:{[key: string]: string | number | Date | null}) => formatStandings(obj)).sort((a:StandingsInfoType,b:StandingsInfoType) => a.OvrRk - b.OvrRk)
-    if (options.season) {
-        stdgData = stdgData.filter(obj => obj.Season === season)
-    }
+	const queryKey = [String(season.Season), 'TeamData', 'Standings']
+	const stdg = useQuery(queryKey, queryFunc)
+	if (stdg.isLoading) return { loading: true }
+	if (stdg.isError) return { error: stdg.error }
+	if (!stdg.isSuccess) return { error: stdg }
+	let stdgData: StandingsInfoType[] = stdg.data
+		.map((obj: { [key: string]: string | number | Date | null }) => formatStandings(obj))
+		.sort((a: StandingsInfoType, b: StandingsInfoType) => a.OvrRk - b.OvrRk)
+	if (options.season) {
+		stdgData = stdgData.filter(obj => obj.Season === season)
+	}
 	if (options.conf) {
-        stdgData = stdgData.filter(obj => obj.conf === options.conf)
-    }
+		stdgData = stdgData.filter(obj => obj.conf === options.conf)
+	}
 	if (options.teamID) {
-        stdgData = stdgData.filter(obj => +obj.gshlTeam === options.teamID)
-    }
+		stdgData = stdgData.filter(obj => +obj.gshlTeam === options.teamID)
+	}
 	if (options.ownerID) {
-        stdgData = stdgData.filter(obj => +obj.Owner === options.ownerID)
-    }
+		stdgData = stdgData.filter(obj => +obj.Owner === options.ownerID)
+	}
 	if (options.OvrRkMax) {
-        stdgData = stdgData.filter(obj => options.OvrRkMax && +obj.OvrRk <= options.OvrRkMax)
-    }
+		stdgData = stdgData.filter(obj => options.OvrRkMax && +obj.OvrRk <= options.OvrRkMax)
+	}
 	if (options.OvrRkMin) {
-        stdgData = stdgData.filter(obj => options.OvrRkMin && +obj.OvrRk >= options.OvrRkMin)
-    }
+		stdgData = stdgData.filter(obj => options.OvrRkMin && +obj.OvrRk >= options.OvrRkMin)
+	}
 	if (options.CCRkMax) {
-        stdgData = stdgData.filter(obj => options.CCRkMax && +obj.CCRk <= options.CCRkMax)
-    }
+		stdgData = stdgData.filter(obj => options.CCRkMax && +obj.CCRk <= options.CCRkMax)
+	}
 	if (options.CCRkMin) {
-        stdgData = stdgData.filter(obj => options.CCRkMin && +obj.CCRk >= options.CCRkMin)
-    }
+		stdgData = stdgData.filter(obj => options.CCRkMin && +obj.CCRk >= options.CCRkMin)
+	}
 	if (options.WCRkMax) {
-        stdgData = stdgData.filter(obj => options.WCRkMax &&obj.WCRk&& +obj.WCRk <= options.WCRkMax)
-    }
+		stdgData = stdgData.filter(obj => options.WCRkMax && obj.WCRk && +obj.WCRk <= options.WCRkMax)
+	}
 	if (options.WCRkMin) {
-        stdgData = stdgData.filter(obj => options.WCRkMin &&obj.WCRk&& +obj.WCRk >= options.WCRkMin)
-    }
+		stdgData = stdgData.filter(obj => options.WCRkMin && obj.WCRk && +obj.WCRk >= options.WCRkMin)
+	}
 	if (options.LTRkMax) {
-        stdgData = stdgData.filter(obj => options.LTRkMax &&obj.LTRk&& +obj.LTRk <= options.LTRkMax)
-    }
+		stdgData = stdgData.filter(obj => options.LTRkMax && obj.LTRk && +obj.LTRk <= options.LTRkMax)
+	}
 	if (options.LTRkMin) {
-        stdgData = stdgData.filter(obj => options.LTRkMin &&obj.LTRk&& +obj.LTRk >= options.LTRkMin)
-    }
+		stdgData = stdgData.filter(obj => options.LTRkMin && obj.LTRk && +obj.LTRk >= options.LTRkMin)
+	}
 	if (options.POFinish) {
-        stdgData = stdgData.filter(obj => obj.POFinish === options.POFinish)
-    }
-    return {data: stdgData}
+		stdgData = stdgData.filter(obj => obj.POFinish === options.POFinish)
+	}
+	return { data: stdgData }
 }

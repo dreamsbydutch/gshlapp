@@ -1,20 +1,20 @@
 import { Fragment } from 'react'
 import { Popover, Transition } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/solid'
-import { seasons } from '../../utils/constants'
+import { seasons } from '../../lib/constants'
 import {
 	PageToolbarPropsType,
 	SeasonTogglePropsType,
 	SecondaryPageToolbarPropsType,
 	TeamsTogglePropsType,
 	WeeksTogglePropsType,
-} from '../../utils/types'
+} from '../../lib/types'
 import { SetURLSearchParams } from 'react-router-dom'
 import { Season, SeasonInfoDataType } from '../../api/types'
 import { useWeeksData } from '../../api/queries/weeks'
 import { useGSHLTeams } from '../../api/queries/teams'
-import { seasonToString } from '../../utils/utils'
-import updateSearchParams from '../../utils/updateSearchParams'
+import { seasonToString } from '../../lib/utils'
+import updateSearchParams from '../../lib/updateSearchParams'
 
 export function WeeksToggle(props: WeeksTogglePropsType) {
 	const weeks = useWeeksData(props.weekOptions).data

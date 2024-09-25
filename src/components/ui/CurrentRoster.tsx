@@ -1,8 +1,8 @@
 import { useContractData, useSalaryData } from '../../api/queries/contracts'
 import { TeamInfoType, useCurrentRoster } from '../../api/queries/teams'
 import { SeasonInfoDataType } from '../../api/types'
-import { upcomingSeasons } from '../../utils/constants'
-import { moneyFormatter } from '../../utils/utils'
+import { upcomingSeasons } from '../../lib/constants'
+import { moneyFormatter } from '../../lib/utils'
 import { LoadingSpinner } from './LoadingSpinner'
 
 export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoType; season: SeasonInfoDataType }) {

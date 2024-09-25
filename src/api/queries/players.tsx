@@ -2,8 +2,8 @@ import { useQueries, useQuery } from 'react-query'
 import { queryFunc } from '../fetch'
 import { Season, SeasonInfoDataType, WeekType } from '../types'
 import { formatPlayerStats, formatPlayerWeeks, formatStandings } from '../formatters'
-import { formatDate, getSeason } from '../../utils/utils'
-import { seasons } from '../../utils/constants'
+import { formatDate, getSeason } from '../../lib/utils'
+import { seasons } from '../../lib/constants'
 import { TeamInfoType } from './teams'
 
 // PLAYER DATA TYPES

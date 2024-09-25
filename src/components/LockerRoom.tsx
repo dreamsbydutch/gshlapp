@@ -1,6 +1,6 @@
 import { SetURLSearchParams, useSearchParams } from 'react-router-dom'
-import { seasons, upcomingSeasons } from '../utils/constants'
-import { SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../utils/types'
+import { seasons, upcomingSeasons } from '../lib/constants'
+import { SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../lib/types'
 import { SeasonPageToggleNavbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
 import {
 	TeamAwardType,
@@ -12,9 +12,9 @@ import {
 	useGSHLTeams,
 } from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
-import { formatYears, getSeason, moneyFormatter } from '../utils/utils'
+import { formatYears, getSeason, moneyFormatter } from '../lib/utils'
 import { PlayerContractType, useContractData } from '../api/queries/contracts'
-import updateSearchParams from '../utils/updateSearchParams'
+import updateSearchParams from '../lib/updateSearchParams'
 import { usePlayerSplits, usePlayerTotals } from '../api/queries/players'
 import TeamRoster from './ui/CurrentRoster'
 import { Season } from '../api/types'
@@ -364,7 +364,10 @@ function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 						<div key={i + 1} className="text-gray-400">
 							<div className="mx-auto w-5/6 py-1 px-2 text-center text-xs border-t border-gray-300">
 								{currentTeamContracts[teamDraftPicks.length - i - 1].PlayerName}, {currentTeamContracts[teamDraftPicks.length - i - 1].Pos} (
-								{obj.Rd + numberSuffix(+obj.Rd)} Round)
+								{`${obj.Rd + numberSuffix(+obj.Rd)} Round${
+									Number.isInteger(+obj.Pick) ? ', ' + obj.Pick + numberSuffix(+obj.Pick) + ' Overall' : ''
+								}`}
+								)
 							</div>
 						</div>
 					)

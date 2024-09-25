@@ -6,7 +6,7 @@ import { StandingsInfoType, StandingsQueryOptions, useStandingsData } from '../a
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import ErrorPage from '../error'
 import { useSearchParams } from 'react-router-dom'
-import { seasons } from '../utils/constants'
+import { seasons } from '../lib/constants'
 import { LosersBracket, PlayoffBracket } from './pages/Playoffs'
 
 type StandingsOption = 'Overall' | 'Conference' | 'Wildcard' | 'Playoffs' | 'LosersTourney'

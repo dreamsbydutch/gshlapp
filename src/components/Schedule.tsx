@@ -1,13 +1,13 @@
 import { SecondaryPageToolbar, TeamsToggle, WeeksToggle } from './ui/PageNavBar'
-import { seasons } from '../utils/constants'
+import { seasons } from '../lib/constants'
 import { TeamInfoType, useGSHLTeams } from '../api/queries/teams'
 import { Link, SetURLSearchParams, useSearchParams } from 'react-router-dom'
 import { ScheduleWeekType, useWeeksData } from '../api/queries/weeks'
-import { TeamsTogglePropsType, WeeksTogglePropsType } from '../utils/types'
+import { TeamsTogglePropsType, WeeksTogglePropsType } from '../lib/types'
 import { SeasonInfoDataType } from '../api/types'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { MatchupDataType, useScheduleData } from '../api/queries/schedule'
-import { getSeason, useCurrentWeek } from '../utils/utils'
+import { getSeason, useCurrentWeek } from '../lib/utils'
 
 export default function Schedule() {
 	const [searchParams, setSearchParams] = useSearchParams()
