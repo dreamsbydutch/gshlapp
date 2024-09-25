@@ -469,6 +469,18 @@ function PlayerSalaries() {
 
 function DraftList({ position, draftboard, draftorder, teamData }: { position: NHLPositions, draftboard: DraftBoardDataType[], draftorder: DraftOrderDataType[], teamData: TeamInfoType | undefined }) {
 	const [filteredDraftBoard, setFilteredDraftBoard] = useState<DraftBoardDataType[]>(draftboard.filter(obj => !obj.Pick))
+
+	const [searchItem, setSearchItem] = useState<string>('')
+	const remainingPicks = draftorder.filter(obj => obj.teamID === teamData?.id && !obj.Player)
+	const currentPick = Math.min(...draftorder.map(obj => (obj.signing === 'Yes' || obj.Player ? 300 : obj.Pick)))
+	let inputHandler = (e: any) => {
+		e.preventDefault()
+		const searchTerm = e.target.value
+		setSearchItem(searchTerm)
+		const filteredItems = draftboard.filter(obj => obj.Player.toLowerCase().includes(searchTerm.toLowerCase()))
+		setFilteredDraftBoard(filteredItems)
+	}
+
 	let x: DraftBoardDataType[]
 	useEffect(() => {
 		switch (position) {
@@ -510,30 +522,25 @@ function DraftList({ position, draftboard, draftorder, teamData }: { position: N
 
 	}, [position])
 
-	return <FilterDraftList {...{ draftboard: filteredDraftBoard, draftorder, teamData }} />
-
-
-	function FilterDraftList({ draftboard, draftorder, teamData }: { draftboard: DraftBoardDataType[], draftorder: DraftOrderDataType[], teamData: TeamInfoType | undefined }) {
-		const [searchItem, setSearchItem] = useState<string>('')
-		const remainingPicks = draftorder.filter(obj => obj.teamID === teamData?.id && !obj.Player)
-		const currentPick = Math.min(...draftorder.map(obj => (obj.signing === 'Yes' || obj.Player ? 300 : obj.Pick)))
-
-		let inputHandler = (e: any) => {
-			const searchTerm = e.target.value
-			setSearchItem(searchTerm)
-			const filteredItems = draftboard.filter(obj => obj.Player.toLowerCase().includes(searchTerm.toLowerCase()))
-			setFilteredDraftBoard(filteredItems)
-		}
-		return (
-			<>
-				<div className="font-bold text-2xl">Eligible Players</div>
-				{teamData && <div className={cn("text-yellow-800 mb-6", remainingPicks[0].Pick - currentPick === 0 ? 'font-bold text-lg' : '')}>
-					{teamData && currentPick && `${teamData.TeamName} are on the clock${remainingPicks[0].Pick - currentPick === 0 ? "!!!" : ` in ${remainingPicks[0].Pick - currentPick} picks`}`}
-				</div>}
-
+	return (
+		<>
+			<div className="font-bold text-2xl">Eligible Players</div>
+			{teamData && <div className={cn("text-yellow-800 mb-6", remainingPicks[0].Pick - currentPick === 0 ? 'font-bold text-lg' : '')}>
+				{teamData && currentPick && `${teamData.TeamName} are on the clock${remainingPicks[0].Pick - currentPick === 0 ? "!!!" : ` in ${remainingPicks[0].Pick - currentPick} picks`}`}
+			</div>}
 				<div className="flex w-full max-w-sm items-center space-x-2 my-2 mx-auto">
 					<Input onChange={inputHandler} value={searchItem} type="search" placeholder="Search..." />
 				</div>
+			<FilterDraftList {...{ draftboard: filteredDraftBoard, draftorder, teamData }} />
+		</>
+	)
+
+
+	function FilterDraftList({ draftboard, draftorder, teamData }: { draftboard: DraftBoardDataType[], draftorder: DraftOrderDataType[], teamData: TeamInfoType | undefined }) {
+
+		return (
+			<>
+
 
 				<div className="grid grid-cols-7 mx-2 font-bold text-sm">
 					<div className="">Rank</div>
