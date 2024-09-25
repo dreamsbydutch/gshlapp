@@ -527,9 +527,9 @@ function DraftList({ position, draftboard, draftorder, teamData }: { position: N
 		return (
 			<>
 				<div className="font-bold text-2xl">Eligible Players</div>
-				<div className={cn("text-yellow-800 mb-6", remainingPicks[0].Pick - currentPick === 0 ? 'font-bold text-lg' : '')}>
+				{teamData && <div className={cn("text-yellow-800 mb-6", remainingPicks[0].Pick - currentPick === 0 ? 'font-bold text-lg' : '')}>
 					{teamData && currentPick && `${teamData.TeamName} are on the clock${remainingPicks[0].Pick - currentPick === 0 ? "!!!" : ` in ${remainingPicks[0].Pick - currentPick} picks`}`}
-				</div>
+				</div>}
 
 				<div className="flex w-full max-w-sm items-center space-x-2 my-2 mx-auto">
 					<Input onChange={inputHandler} value={searchItem} type="search" placeholder="Search..." />
@@ -634,9 +634,9 @@ function DraftBoard({ draftboard, draftorder, teamData }: { draftboard: DraftBoa
 	return (
 		<>
 			<div>Draft Board</div>
-			<div className={cn("text-yellow-800 mb-6", remainingPicks[0].Pick - currentPick === 0 ? 'font-bold text-lg' : '')}>
+			{teamData && <div className={cn("text-yellow-800 mb-6", remainingPicks[0].Pick - currentPick === 0 ? 'font-bold text-lg' : '')}>
 				{teamData && currentPick && `${teamData.TeamName} are on the clock${remainingPicks[0].Pick - currentPick === 0 ? "!!!" : ` in ${remainingPicks[0].Pick - currentPick} picks`}`}
-			</div>
+			</div>}
 			<DraftRoster roster={draftOrder} draftboard={draftboard} />
 			<div className="mt-6 mb-2 text-center mx-auto text-xl font-bold">Remaining Picks</div>
 
