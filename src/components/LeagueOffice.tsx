@@ -472,44 +472,43 @@ function DraftList({ position, draftboard, draftorder, teamData }: { position: N
 	useEffect(() => {
 		switch (position) {
 			case 'Fwd':
-				x = draftboard.filter(obj => obj.Pos1 !== 'D' && obj.Pos1 !== 'G')
+				x = draftboard.filter(obj => !obj.Pick && (obj.Pos1 !== 'D' && obj.Pos1 !== 'G'))
 				setFilteredDraftBoard(x)
 				break
 			case 'Wing':
 				x = draftboard.filter(
-					obj => obj.Pos1 === 'LW' || obj.Pos1 === 'RW' || obj.Pos2 === 'LW' || obj.Pos2 === 'RW' || obj.Pos3 === 'LW' || obj.Pos3 === 'RW'
-				)
+					obj => !obj.Pick && (obj.Pos1 === 'LW' || obj.Pos1 === 'RW' || obj.Pos2 === 'LW' || obj.Pos2 === 'RW' || obj.Pos3 === 'LW' || obj.Pos3 === 'RW'
+				))
 				setFilteredDraftBoard(x)
 				break
 			case 'C':
-				x = draftboard.filter(obj => obj.Pos1 === 'C' || obj.Pos2 === 'C' || obj.Pos3 === 'C')
+				x = draftboard.filter(obj => !obj.Pick && (obj.Pos1 === 'C' || obj.Pos2 === 'C' || obj.Pos3 === 'C'))
 				setFilteredDraftBoard(x)
 				break
 			case 'LW':
-				x = draftboard.filter(obj => obj.Pos1 === 'LW' || obj.Pos2 === 'LW' || obj.Pos3 === 'LW')
+				x = draftboard.filter(obj => !obj.Pick && (obj.Pos1 === 'LW' || obj.Pos2 === 'LW' || obj.Pos3 === 'LW'))
 				setFilteredDraftBoard(x)
 				break
 			case 'RW':
-				x = draftboard.filter(obj => obj.Pos1 === 'RW' || obj.Pos2 === 'RW' || obj.Pos3 === 'RW')
+				x = draftboard.filter(obj => !obj.Pick && (obj.Pos1 === 'RW' || obj.Pos2 === 'RW' || obj.Pos3 === 'RW'))
 				setFilteredDraftBoard(x)
 				break
 			case 'D':
-				x = draftboard.filter(obj => obj.Pos1 === 'D')
+				x = draftboard.filter(obj => !obj.Pick && (obj.Pos1 === 'D'))
 				setFilteredDraftBoard(x)
 				break
 			case 'G':
-				x = draftboard.filter(obj => obj.Pos1 === 'G')
+				x = draftboard.filter(obj => !obj.Pick && (obj.Pos1 === 'G'))
 				setFilteredDraftBoard(x)
 				break
 			case 'Any':
 			default:
-				setFilteredDraftBoard(draftboard)
+				setFilteredDraftBoard(draftboard.filter(obj => !obj.Pick))
 				break
 		}
 
 	}, [position])
 
-	if (!draftboard || !draftorder) return <LoadingSpinner />
 	return <FilterDraftList {...{ draftboard: filteredDraftBoard, draftorder, teamData }} />
 
 
