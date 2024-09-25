@@ -35,6 +35,7 @@ export default function LeagueOffice() {
 	const currentTeamData = useGSHLTeams({ season, teamID: Number(searchParams.get('teamID')) }).data
 	if (!currentTeamData || !data) return <LoadingSpinner />
 	const currentTeam = searchParams.get('teamID') ? currentTeamData[0] : undefined
+	console.log(data)
 	if (!currentTeam || !data.draftboard || !data.draftorder) return <LoadingSpinner />
 
 	const teamsToggleProps: TeamsTogglePropsType = {
