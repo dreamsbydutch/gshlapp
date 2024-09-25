@@ -22,6 +22,7 @@ import { SearchBar } from './search-bar'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
 import { cn } from '@/lib/utils'
+import { deflateRawSync } from 'zlib'
 
 type LeagueOfficePagesType = 'Rulebook' | 'Free Agency' | 'Draft List' | 'Draft Board' | 'History' | 'Trade Block'
 type NHLPositions = 'Any' | 'Fwd' | 'C' | 'Wing' | 'LW' | 'RW' | 'D' | 'G'
@@ -35,7 +36,6 @@ export default function LeagueOffice() {
 	const currentTeamData = useGSHLTeams({ season, teamID: Number(searchParams.get('teamID')) }).data
 	if (!currentTeamData || !data) return <LoadingSpinner />
 	const currentTeam = searchParams.get('teamID') ? currentTeamData[0] : undefined
-	const currentPick = Math.min(...data.draftorder.map(obj => (obj.signing === 'Yes' || obj.Player ? 300 : obj.Pick)))
 	if (!data.draftboard || !data.draftorder) return <LoadingSpinner />
 
 	const teamsToggleProps: TeamsTogglePropsType = {
@@ -91,14 +91,14 @@ export default function LeagueOffice() {
 				<>
 					<SecondaryPageToolbar {...pageToolbarProps} />
 					<TeamsToggle {...teamsToggleProps} />
-					<DraftBoard key={currentPick} {...{ searchParams, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
+					<DraftBoard {...{ searchParams, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
 				</>
 			)}
 			{leagueOfficePage === 'Draft List' && (
 				<>
 					<SecondaryPageToolbar {...pageToolbarProps} />
 					<PageToolbar {...draftBoardToolbarProps} />
-					<DraftList key={currentPick} {...{ position, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
+					<DraftList {...{ position, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
 				</>
 			)}
 			{/* {leagueOfficePage === 'Trade Block' && <TradeBlock {...{ searchParams, setSearchParams }} />} */}
@@ -479,7 +479,7 @@ function DraftList({ position, draftboard, draftorder, teamData }: { position: N
 			case 'Wing':
 				x = draftboard.filter(
 					obj => !obj.Pick && (obj.Pos1 === 'LW' || obj.Pos1 === 'RW' || obj.Pos2 === 'LW' || obj.Pos2 === 'RW' || obj.Pos3 === 'LW' || obj.Pos3 === 'RW'
-				))
+					))
 				setFilteredDraftBoard(x)
 				break
 			case 'C':
@@ -711,6 +711,19 @@ function DraftBoard({ draftboard, draftorder, teamData }: { draftboard: DraftBoa
 																className="h-4 w-4 mx-auto"
 															/>
 														</div>
+														<div
+															className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${playerData.DuRk < 17
+																? 'bg-emerald-400'
+																: playerData.DuRk < 65
+																	? 'bg-emerald-200'
+																	: playerData.DuRk < 161
+																		? 'bg-yellow-200'
+																		: playerData.DuRk < 241
+																			? 'bg-orange-200'
+																			: 'bg-rose-200'
+																}`}>
+															{Math.round(+playerData.DuRtg * 100) / 100}
+														</div>
 													</div>
 												)
 											})}
@@ -738,12 +751,32 @@ function DraftBoard({ draftboard, draftorder, teamData }: { draftboard: DraftBoa
 												className="h-4 w-4 mx-auto"
 											/>
 										</div>
+										<div
+											className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${playerData.DuRk < 17
+												? 'bg-emerald-400'
+												: playerData.DuRk < 65
+													? 'bg-emerald-200'
+													: playerData.DuRk < 161
+														? 'bg-yellow-200'
+														: playerData.DuRk < 241
+															? 'bg-orange-200'
+															: 'bg-rose-200'
+												}`}>
+											{Math.round(+playerData.DuRtg * 100) / 100}
+										</div>
 									</div>
 								)
 							})}
 						</div>
 					</div>
 				) : null}
+				<div className="my-2 flex gap-2 justify-center">
+					<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-400">1 - 16</div>
+					<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-200">17 - 64</div>
+					<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-yellow-200">65 - 160</div>
+					<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-orange-200">161 - 240</div>
+					<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-rose-200">241 +</div>
+				</div>
 			</>
 		)
 	}

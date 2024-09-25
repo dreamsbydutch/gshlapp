@@ -14,6 +14,8 @@ export type DraftBoardDataType = {
 	Pos3: string
 	Team: string
 	Salary: number
+	DuRtg: number
+	DuRk: number
 	Age: number
 	Yahoo: number
 	ESPN: number
