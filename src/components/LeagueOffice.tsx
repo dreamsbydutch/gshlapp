@@ -35,6 +35,7 @@ export default function LeagueOffice() {
 	const currentTeamData = useGSHLTeams({ season, teamID: Number(searchParams.get('teamID')) }).data
 	if (!currentTeamData || !data) return <LoadingSpinner />
 	const currentTeam = searchParams.get('teamID') ? currentTeamData[0] : undefined
+	const currentPick = Math.min(...data.draftorder.map(obj => (obj.signing === 'Yes' || obj.Player ? 300 : obj.Pick)))
 	if (!data.draftboard || !data.draftorder) return <LoadingSpinner />
 
 	const teamsToggleProps: TeamsTogglePropsType = {
@@ -90,14 +91,14 @@ export default function LeagueOffice() {
 				<>
 					<SecondaryPageToolbar {...pageToolbarProps} />
 					<TeamsToggle {...teamsToggleProps} />
-					<DraftBoard {...{ searchParams, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
+					<DraftBoard key={currentPick} {...{ searchParams, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
 				</>
 			)}
 			{leagueOfficePage === 'Draft List' && (
 				<>
 					<SecondaryPageToolbar {...pageToolbarProps} />
 					<PageToolbar {...draftBoardToolbarProps} />
-					<DraftList {...{ position, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
+					<DraftList key={currentPick} {...{ position, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
 				</>
 			)}
 			{/* {leagueOfficePage === 'Trade Block' && <TradeBlock {...{ searchParams, setSearchParams }} />} */}
