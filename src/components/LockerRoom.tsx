@@ -3,6 +3,7 @@ import { seasons, upcomingSeasons } from '../lib/constants'
 import { SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../lib/types'
 import { SeasonPageToggleNavbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
 import {
+	TeamAllStarsType,
 	TeamAwardType,
 	TeamDraftPickType,
 	TeamInfoType,
@@ -12,10 +13,10 @@ import {
 	useGSHLTeams,
 } from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
-import { formatYears, getSeason, moneyFormatter } from '../lib/utils'
+import { formatYears, getNumberInWrittenForm, getNumberWithSuffix, getSeason, moneyFormatter } from '../lib/utils'
 import { PlayerContractType, useContractData } from '../api/queries/contracts'
 import updateSearchParams from '../lib/updateSearchParams'
-import { usePlayerSplits, usePlayerTotals } from '../api/queries/players'
+import { usePlayerSplits } from '../api/queries/players'
 import TeamRoster from './ui/CurrentRoster'
 import { Season } from '../api/types'
 import { useState } from 'react'
@@ -27,10 +28,11 @@ export default function LockerRoom() {
 	const [searchParams, setSearchParams] = useSearchParams()
 	const lockerRoomPage: LockerRoomPagesType = searchParams.get('pgType') as LockerRoomPagesType
 	const season = seasons.slice(-1)[0]
-	const currentTeamData = useGSHLTeams({ season, teamID: Number(searchParams.get('teamID')) }).data
+	const rawTeamData = useGSHLTeams({}).data
+	const currentTeamData = rawTeamData?.filter(team => team.id === Number(searchParams.get('teamID')))[0]
+	if (!rawTeamData) return <LoadingSpinner />
 	const plyrStatsSeason: Season = (searchParams.get('statSzn') || getSeason().Season) as Season
-	if (!currentTeamData) return <LoadingSpinner />
-	const currentTeam = searchParams.get('teamID') ? currentTeamData[0] : undefined
+	const currentTeam = searchParams.get('teamID') ? currentTeamData : undefined
 
 	const teamsToggleProps: TeamsTogglePropsType = {
 		activeKey: currentTeam,
@@ -60,12 +62,12 @@ export default function LockerRoom() {
 					<div className="font-bold text-2xl flex flex-col items-center justify-center mb-4">
 						<img className="max-w-xs w-2/6 h-2/6 mx-auto" src={currentTeam.LogoURL} alt="Team Logo" />
 						{currentTeam.TeamName}
+
+						<span className="text-base font-normal">
+							<TeamCareerString teamID={Number(searchParams.get('teamID'))} rawTeamData={rawTeamData} />
+						</span>
 					</div>
-					{(lockerRoomPage === null || lockerRoomPage === 'Roster') && (
-						<>
-							<TeamRoster {...{ teamInfo: currentTeam, season: getSeason() }} />
-						</>
-					)}
+					{(lockerRoomPage === null || lockerRoomPage === 'Roster') && <TeamRoster {...{ teamInfo: currentTeam, season: getSeason() }} />}
 					{lockerRoomPage === 'Contracts' && (
 						<>
 							<TeamPlayerContracts {...{ teamInfo: currentTeam }} />
@@ -83,16 +85,8 @@ export default function LockerRoom() {
 						</>
 					)}
 					{lockerRoomPage === 'Team Stats' && <>{/* <TeamStatChart {...teamStatprops} /> */}</>}
-					{lockerRoomPage === 'History' && (
-						<>
-							<TeamHistoryContainer {...{ teamInfo: currentTeam, paramState: [searchParams, setSearchParams] }} />
-						</>
-					)}
-					{lockerRoomPage === 'Trophy Case' && (
-						<>
-							<TeamTrophyCase {...{ teamInfo: currentTeam }} />
-						</>
-					)}
+					{lockerRoomPage === 'History' && <TeamHistoryContainer {...{ teamInfo: currentTeam, paramState: [searchParams, setSearchParams] }} />}
+					{lockerRoomPage === 'Trophy Case' && <TeamTrophyCase {...{ teamInfo: currentTeam }} />}
 					<div className="mb-14 text-white">.</div>
 				</>
 			)}
@@ -104,6 +98,39 @@ export default function LockerRoom() {
 			)}
 		</div>
 	)
+}
+function TeamCareerString({ teamID, rawTeamData }: { teamID: number; rawTeamData: TeamInfoType[] }) {
+	const currentTeamData = rawTeamData?.filter(team => team.id === teamID)[0]
+	const currentOwnerData = rawTeamData?.filter(obj => obj.Owner.id === Number(currentTeamData?.Owner.id))
+	if (!rawTeamData || !currentTeamData || !currentOwnerData) return null
+	Object.keys(currentTeamData).forEach(key => {
+		if (!isNaN(Number(key))) {
+			currentTeamData[key] = currentOwnerData
+				.map(obj => {
+					return Number(obj[key] === undefined ? 0 : obj[key])
+				})
+				.reduce((p, c) => (p += c), 0)
+		}
+	})
+	let string = ''
+	Object.keys(currentTeamData).forEach((key, i) => {
+		if (!isNaN(Number(key))) {
+			if (i === 0 && currentTeamData[key] >= 1) {
+				string += key.toString() + '-'
+			} else if (i !== 0) {
+				if (currentTeamData[(+key - 1).toString()] >= 1 && currentTeamData[key] === 0) {
+					string += key.toString()
+				}
+				if (currentTeamData[(+key - 1).toString()] === 0 && currentTeamData[key] >= 1) {
+					string += (string === '' ? '' : ', ') + key.toString() + '-'
+				}
+				if (seasons.slice(-1)[0].Season.toString() === key.toString() && currentTeamData[key] >= 1) {
+					string += key.toString()
+				}
+			}
+		}
+	})
+	return string
 }
 
 export function CapOverview({ paramState }: { paramState: (URLSearchParams | SetURLSearchParams)[] }) {
@@ -1041,10 +1068,13 @@ function TeamHistoryMatchupLine({
 }
 
 function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
-	const awardData = useAwardHistory({ ownerID: teamInfo.Owner.id })
-		.data?.sort((a, b) => b.Season - a.Season)
-		.sort((a, b) => a.id - b.id)
-	if (!awardData) {
+	const { awards: rawAwardsData, allStars: rawAllStarsData } = useAwardHistory({ ownerID: teamInfo.Owner.id }).data ?? {
+		awards: null,
+		allStars: null,
+	}
+	const awardData = rawAwardsData?.sort((a, b) => b.Season - a.Season).sort((a, b) => a.id - b.id)
+	const allStarsData = rawAllStarsData?.sort((a, b) => b.Season - a.Season).sort((a, b) => b.Rating - a.Rating)
+	if (!awardData || !allStarsData) {
 		return <LoadingSpinner />
 	}
 	const awards = [
@@ -1053,9 +1083,9 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 		'Sunview Regular Season Champ',
 		'Hickory Hotel Regular Season Champ',
 		'League Loser',
-		'Hart Trophy Winner',
 		'GM of the Year',
 		'Coach of the Year',
+		'Hart Trophy Winner',
 		'Calder Winner',
 		'Norris Winner',
 		'Vezina Winner',
@@ -1070,9 +1100,9 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 		'TwoSevenSix',
 		'UnitFour',
 		'Loser',
-		'Hart',
 		'GMOY',
 		'JackAdams',
+		'Hart',
 		'Calder',
 		'Norris',
 		'Vezina',
@@ -1083,31 +1113,138 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 	].map(obj => {
 		return awardData.filter(a => a.Award === obj).sort((a, b) => b.Season - a.Season)
 	})
+	const allStarTotals = [
+		[
+			allStarsData.filter((obj: TeamAllStarsType) => obj.BestPos.startsWith('1')),
+			allStarsData.filter((obj: TeamAllStarsType) => obj.owner.length > 1).filter((obj: TeamAllStarsType) => obj.BestPos.startsWith('1')),
+		],
+		[
+			allStarsData.filter((obj: TeamAllStarsType) => obj.BestPos.startsWith('2')),
+			allStarsData.filter((obj: TeamAllStarsType) => obj.owner.length > 1).filter((obj: TeamAllStarsType) => obj.BestPos.startsWith('2')),
+		],
+		[
+			allStarsData.filter((obj: TeamAllStarsType) => obj.BestPos.startsWith('P')),
+			allStarsData.filter((obj: TeamAllStarsType) => obj.owner.length > 1).filter((obj: TeamAllStarsType) => obj.BestPos.startsWith('P')),
+		],
+	]
 	return (
-		<div className="flex flex-row gap-4 mx-2 flex-wrap justify-center">
-			<div className="w-full font-varela">
+		<div className="flex flex-col mx-auto px-2 flex-wrap justify-center items-center">
+			<div className="w-full font-oswald">
 				{awardSorted.map((obj, i) => {
 					if (obj.length === 0) return null
 					if (obj.length === 1)
 						return (
-							<div className={i === 0 ? '' : i < 5 ? 'text-xs' : 'text-2xs'}>
+							<div className={i === 0 ? 'text-lg' : i < 5 ? 'text-base' : i < 8 ? 'text-sm' : 'text-xs'}>
 								{obj[0].Season} {awards[i]}
 							</div>
 						)
 					return (
-						<div className={i === 0 ? '' : i < 5 ? 'text-xs' : 'text-2xs'}>
+						<div className={i === 0 ? 'text-lg' : i < 5 ? 'text-base' : i < 8 ? 'text-sm' : 'text-xs'}>
 							{obj.length}-time {awards[i]} ({formatYears(obj.map(a => a.Season))})
 						</div>
 					)
 				})}
+				{allStarTotals.map((obj, i) => {
+					if (obj[0].length === 0 && obj[1].length === 0) return null
+					return (
+						<div className="text-2xs">
+							{obj[0].length !== 0 &&
+								getNumberInWrittenForm(obj[0].length)[0].toUpperCase() +
+									getNumberInWrittenForm(obj[0].length).slice(1) +
+									(i === 0 ? ' First Team All-Star' : i === 1 ? ' Second Team All-Star' : ' Playoff All-Star') +
+									(obj[0].length > 1 ? 's' : '')}
+							{obj[1].length !== 0 &&
+								' (' + getNumberInWrittenForm(obj[1].length)[0].toUpperCase() + getNumberInWrittenForm(obj[1].length).slice(1) + ' Shared)'}
+						</div>
+					)
+				})}
 			</div>
-			{awardSorted.flat().map(obj => (
-				<TrophyDisplay {...{ trophyID: obj.Award, season: obj.Season, teamStats: obj, teamInfo }} />
-			))}
+			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+					{awardSorted[0]
+						.sort((a, b) => b.Season - a.Season)
+						.map(obj => (
+							<TrophyDisplay {...{ trophyID: obj.Award, season: obj.Season, teamStats: obj, teamInfo }} />
+						))}
+				</div>
+			</div>
+			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
+				<div className="text-xs text-slate-400 font-oswald">Team Trophies</div>
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+					{awardSorted
+						.slice(1, 5)
+						.flat()
+						.sort((a, b) => b.Season - a.Season)
+						.map(obj => (
+							<TrophyDisplay {...{ trophyID: obj.Award, season: obj.Season, teamStats: obj, teamInfo }} />
+						))}
+				</div>
+			</div>
+			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
+				<div className="text-xs text-slate-400 font-oswald">Tier 1 Awards</div>
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+					{awardSorted
+						.slice(5, 8)
+						.flat()
+						.sort((a, b) => b.Season - a.Season)
+						.map(obj => (
+							<TrophyDisplay {...{ trophyID: obj.Award, season: obj.Season, teamStats: obj, teamInfo }} />
+						))}
+				</div>
+			</div>
+			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
+				<div className="text-xs text-slate-400 font-oswald">Tier 2 Awards</div>
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+					{awardSorted
+						.slice(8)
+						.flat()
+						.sort((a, b) => b.Season - a.Season)
+						.map(obj => (
+							<TrophyDisplay {...{ trophyID: obj.Award, season: obj.Season, teamStats: obj, teamInfo }} />
+						))}
+				</div>
+			</div>
+			<div className="flex flex-col flex-wrap items-center justify-center w-5/6 py-2">
+				<div className="text-xs text-slate-400 font-oswald">All-Stars</div>
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+					{allStarTotals.map((tier, i) => {
+						return tier[0]
+							.sort((a, b) => b.Season - a.Season)
+							.map(player => (
+								<div className="flex flex-col font-oswald">
+									<div className={i === 0 ? 'text-sm' : i === 1 ? 'text-xs' : 'text-xs'}>
+										{i === 0
+											? player.Season + ' 1st Team ' + player.BestPos.slice(1) + ' - ' + player.PlayerName
+											: i === 1
+											? player.Season + ' 2nd Team ' + player.BestPos.slice(1) + ' - ' + player.PlayerName
+											: player.Season + ' Playoff ' + player.BestPos.slice(1) + ' - ' + player.PlayerName}
+									</div>
+									<div className={i === 0 ? 'text-2xs' : i === 1 ? 'text-3xs' : 'text-3xs'}>
+										{player.BestPos.slice(1) === 'G'
+											? player.W + ' W - ' + player.GAA.toFixed(2) + ' GAA - ' + player.SVP.toFixed(3) + ' SVP'
+											: player.G +
+											  ' G - ' +
+											  player.A +
+											  ' A - ' +
+											  player.P +
+											  ' P - ' +
+											  player.PPP +
+											  ' PPP - ' +
+											  player.SOG +
+											  ' SOG - ' +
+											  player.HIT +
+											  ' HIT - ' +
+											  player.BLK +
+											  ' BLK'}
+									</div>
+								</div>
+							))
+					})}
+				</div>
+			</div>
 		</div>
 	)
 }
-
 function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; season: Season; teamStats: TeamAwardType }) {
 	const teamInfo = useGSHLTeams({ teamID: teamStats.gshlTeam }).data
 	if (!teamInfo) return <></>

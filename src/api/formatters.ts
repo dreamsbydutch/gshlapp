@@ -88,12 +88,21 @@ export function formatPlayerStats(statLine: { [key: string]: number | string | s
 	statLine.gshlTeam = String(statLine.gshlTeam)
 		.split(',')
 		.map(obj => +obj)
+	statLine.owner = String(statLine.owner)
+		.split(',')
+		.map(obj => +obj)
 	statLine.nhlTeam = String(statLine.nhlTeam).split(',')
 	statLine.nhlPos = String(statLine.nhlPos).split(',')
 	statLine = formatNumbersInsideInputs(statLine)
 	return statLine
 }
 export function formatTeamStats(statLine: { [key: string]: number | string | string[] | number[] | Date | null }) {
+	statLine.gshlTeam = String(statLine.gshlTeam)
+		.split(',')
+		.map(obj => +obj)
+	statLine.owner = String(statLine.owner)
+		.split(',')
+		.map(obj => +obj)
 	statLine.Date = typeof statLine.Date === 'string' ? new Date(statLine.Date + 'T00:00:00') : statLine.Date
 	statLine = formatNumbersInsideInputs(statLine)
 	return statLine
@@ -102,6 +111,9 @@ export function formatCurrentRoster(player: { [key: string]: number | string | s
 	player.nhlPos = String(player.nhlPos).split(',')
 	player.nhlTeam = String(player.nhlTeam).split(',')
 	player.gshlTeam = String(player.gshlTeam)
+		.split(',')
+		.map(obj => +obj)
+	player.owner = String(player.owner)
 		.split(',')
 		.map(obj => +obj)
 	player = formatNumbersInsideInputs(player)

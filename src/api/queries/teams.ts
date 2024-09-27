@@ -2,8 +2,8 @@ import { useQueries, useQuery } from 'react-query'
 import { getSeason, seasonToString } from '../../lib/utils'
 import { Season, SeasonInfoDataType, WeekType } from '../types'
 import { queryFunc } from '../fetch'
-import { formatCurrentRoster, formatOwnerInfo, formatTeamInfo, formatTeamStats } from '../formatters'
-import { PlayerCurrentRosterType } from './players'
+import { formatCurrentRoster, formatOwnerInfo, formatPlayerStats, formatTeamInfo, formatTeamStats } from '../formatters'
+import { PlayerCurrentRosterType, PlayerSeasonType } from './players'
 import { seasons } from '../../lib/constants'
 
 export type TeamsQueryOptions = {
@@ -70,10 +70,10 @@ export function useGSHLTeams(options: TeamsQueryOptions) {
 		teamsData = teamsData.filter(obj => options.season && obj[options.season.Season])
 	}
 	if (options.teamID) {
-		teamsData = teamsData.filter(obj => +obj.id === options.teamID)
+		teamsData = teamsData.filter(obj => options.teamID && +obj.id === +options.teamID)
 	}
 	if (options.ownerID) {
-		teamsData = teamsData.filter(obj => +obj.OwnerID === options.ownerID)
+		teamsData = teamsData.filter(obj => options.ownerID && +obj.OwnerID === +options.ownerID)
 	}
 	if (options.conf) {
 		teamsData = teamsData.filter(obj => obj.Conf === options.conf)
@@ -89,8 +89,8 @@ type TeamBaseType = {
 	id: number
 	Season: Season
 	WeekType: WeekType
-	gshlTeam: number
-	owner: number
+	gshlTeam: number[]
+	owner: number[]
 	GP: number
 	GPg: number
 	IR: number
@@ -158,7 +158,7 @@ export function useTeamDays(options: TeamDayOptions) {
 		daysData = daysData.filter(obj => obj.WeekNum === options.WeekNum)
 	}
 	if (options.gshlTeam) {
-		daysData = daysData.filter(obj => obj.gshlTeam === options.gshlTeam)
+		daysData = daysData.filter(obj => obj.gshlTeam.includes(options.gshlTeam ?? 0))
 	}
 	return { data: daysData }
 }
@@ -184,7 +184,7 @@ export function useTeamWeeks(options: TeamWeekOptions) {
 		weeksData = weeksData.filter(obj => obj.WeekNum === options.WeekNum)
 	}
 	if (options.gshlTeam) {
-		weeksData = weeksData.filter(obj => obj.gshlTeam === options.gshlTeam)
+		weeksData = weeksData.filter(obj => obj.gshlTeam.includes(options.gshlTeam ?? 0))
 	}
 	return { data: weeksData }
 }
@@ -206,7 +206,7 @@ export function useTeamSeasons(options: TeamSeasonOptions) {
 		seasonsData = seasonsData.filter(obj => obj.Season === season.Season)
 	}
 	if (options.gshlTeam) {
-		seasonsData = seasonsData.filter(obj => obj.gshlTeam === options.gshlTeam)
+		seasonsData = seasonsData.filter(obj => obj.gshlTeam.includes(options.gshlTeam ?? 0))
 	}
 	return { data: seasonsData }
 }
@@ -279,27 +279,41 @@ type TeamAwardOptions = {
 export type TeamAwardType = TeamSeasonType & {
 	Award: string
 }
+export type TeamAllStarsType = PlayerSeasonType & {
+	BestPos: string
+}
 export function useAwardHistory(options: TeamAwardOptions) {
 	const season: SeasonInfoDataType = getSeason(options.season)
 	const queryKey = [String(season.Season), 'MainInput', 'Awards']
+	const queryKeyTwo = [String(season.Season), 'MainInput', 'AllStars']
 	const awards = useQuery(queryKey, queryFunc)
-	if (awards.isLoading) return { loading: true }
-	if (awards.isError) return { error: awards.error }
-	if (!awards.isSuccess) return { error: awards }
+	const allStars = useQuery(queryKeyTwo, queryFunc)
+	if (awards.isLoading || allStars.isLoading) return { loading: true }
+	if (awards.isError || allStars.isError) return { error: { awards: awards.error, allStars: allStars.error } }
+	if (!awards.isSuccess || !allStars.isSuccess) return { error: { awards, allStars } }
 	let awardsData: TeamAwardType[] = awards.data.map((obj: { [key: string]: string | number | Date | null }) => formatTeamStats(obj))
+	let allStarsData: TeamAllStarsType[] = allStars.data.map((obj: { [key: string]: string | number | Date | null }) => formatPlayerStats(obj))
 	if (options.season) {
 		awardsData = awardsData.filter(obj => obj.Season === options.season)
+		allStarsData = allStarsData.filter(obj => obj.Season === options.season)
 	}
 	if (options.teamID) {
-		awardsData = awardsData.filter(obj => obj.gshlTeam === options.teamID)
+		awardsData = awardsData.filter(obj => obj.gshlTeam.includes(options.teamID ?? 0))
+		allStarsData = allStarsData.filter(obj => obj.gshlTeam.includes(options.teamID ?? 0))
 	}
 	if (options.ownerID) {
-		awardsData = awardsData.filter(obj => obj.owner === options.ownerID)
+		awardsData = awardsData.filter(obj => obj.owner && obj.owner.includes(options.ownerID ?? 0))
+		allStarsData = allStarsData.filter(obj =>
+			obj.owner
+				.toString()
+				.split(',')
+				.includes(options.ownerID?.toString() ?? '0')
+		)
 	}
 	if (options.award) {
 		awardsData = awardsData.filter(obj => obj.Award === options.award)
 	}
-	return { data: awardsData.filter(obj => obj.gshlTeam) }
+	return { data: { awards: awardsData.filter(obj => obj.gshlTeam), allStars: allStarsData.filter(obj => obj.gshlTeam) } }
 }
 
 export type PlayoffProbOptions = {

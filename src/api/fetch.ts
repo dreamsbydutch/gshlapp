@@ -22,7 +22,18 @@ type TeamOptions =
 	| 'Probabilities'
 	| 'DraftOrder'
 	| 'AwardNominees'
-type InputOptions = 'Users' | 'GSHLTeams' | 'Weeks' | 'Schedule' | 'Contracts' | 'Rulebook' | 'Headlines' | 'DraftBoard' | 'LiveDraftOrder'
+type InputOptions =
+	| 'Users'
+	| 'GSHLTeams'
+	| 'Weeks'
+	| 'Schedule'
+	| 'Contracts'
+	| 'Rulebook'
+	| 'Awards'
+	| 'AllStars'
+	| 'Headlines'
+	| 'DraftBoard'
+	| 'LiveDraftOrder'
 type StatTypeType = 'PlayerData' | 'TeamData'
 
 export async function queryFunc({ queryKey }: { queryKey: string[] }) {
@@ -80,6 +91,7 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
 			case 'Contracts':
 			case 'Rulebook':
 			case 'Awards':
+			case 'AllStars':
 			case 'Headlines':
 			case 'DraftBoard':
 			case 'LiveDraftOrder':

@@ -16,6 +16,7 @@ type PlayerInfoType = {
 	PosGroup: 'F' | 'D' | 'G'
 	nhlTeam: string[] | null
 	gshlTeam: number[]
+	owner: number[]
 	Age?: number
 	GP: number | null
 	PPD: number | null
