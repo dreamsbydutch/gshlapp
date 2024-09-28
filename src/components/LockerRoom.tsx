@@ -1153,8 +1153,8 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 									getNumberInWrittenForm(obj[0].length).slice(1) +
 									(i === 0 ? ' First Team All-Star' : i === 1 ? ' Second Team All-Star' : ' Playoff All-Star') +
 									(obj[0].length > 1 ? 's' : '')}
-							{obj[1].length !== 0 &&
-								' (' + getNumberInWrittenForm(obj[1].length)[0].toUpperCase() + getNumberInWrittenForm(obj[1].length).slice(1) + ' Shared)'}
+							{/* {obj[1].length !== 0 &&
+								' (' + getNumberInWrittenForm(obj[1].length)[0].toUpperCase() + getNumberInWrittenForm(obj[1].length).slice(1) + ' Shared)'} */}
 						</div>
 					)
 				})}
