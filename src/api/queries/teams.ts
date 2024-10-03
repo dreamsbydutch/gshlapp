@@ -316,6 +316,103 @@ export function useAwardHistory(options: TeamAwardOptions) {
 	return { data: { awards: awardsData.filter(obj => obj.gshlTeam), allStars: allStarsData.filter(obj => obj.gshlTeam) } }
 }
 
+export type GMRankingsOptions = {
+	ownerID?: number
+}
+export type GMRankingsType = {
+	id: number
+	FirstName: string
+	Nickname: string
+	LastName: string
+	Owing: number
+	Email: string
+	Draft22: string
+	Meetings22: string
+	Draft23: string
+	Meetings23: string
+	Draft24: string
+	Meetings24: string
+	W: number
+	HW: number
+	HL: number
+	L: number
+	PTS: number
+	CF: number
+	CA: number
+	Diff: number
+	CCW: number
+	CCHW: number
+	CCHL: number
+	CCL: number
+	CCPTS: number
+	CCCF: number
+	CCCA: number
+	CCDiff: number
+	POW: number
+	POHW: number
+	POHL: number
+	POL: number
+	POPTS: number
+	POCF: number
+	POCA: number
+	PODiff: number
+	LTW: number
+	LTHW: number
+	LTHL: number
+	LTL: number
+	LTPTS: number
+	LTCF: number
+	LTCA: number
+	LTDiff: number
+	DraftPtsAdj: number
+	Players: number
+	Norris: number
+	Vezina: number
+	Calder: number
+	JackAdams: number
+	GMOY: number
+	Add: number
+	GP: number
+	GPg: number
+	IR: number
+	IRP: number
+	MG: number
+	GS: number
+	GSg: number
+	G: number
+	A: number
+	P: number
+	PPP: number
+	SOG: number
+	HIT: number
+	BLK: number
+	GW: number
+	GA: number
+	SV: number
+	SA: number
+	TOI: number
+	MS: number
+	BS: number
+	Rating: number
+	GAA: number
+	SVP: number
+	OwnerScore: string
+	seasons: string
+}
+export function useGMRankings(options: GMRankingsOptions) {
+	const queryKey = [String(getSeason().Season), 'MainInput', 'GMRankings']
+	const rankings = useQuery(queryKey, queryFunc)
+	if (rankings.isLoading) return { loading: true }
+	if (rankings.isError) return { error: rankings.error }
+	if (!rankings.isSuccess) return { error: rankings }
+	let rankingsData: GMRankingsType[] = rankings.data.map((obj: { [key: string]: string | number | Date | null }) => formatTeamStats(obj))
+
+	if (options.ownerID) {
+		rankingsData = rankingsData.filter(obj => obj.id === options.ownerID)
+	}
+	return { data: rankingsData, loading: false, error: undefined }
+}
+
 export type PlayoffProbOptions = {
 	season: Season
 	teamID?: number

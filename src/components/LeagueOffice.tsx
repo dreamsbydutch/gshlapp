@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { seasons } from '../lib/constants'
-import { TeamInfoType, useGSHLTeams } from '../api/queries/teams'
+import { TeamInfoType, useGMRankings, useGSHLTeams } from '../api/queries/teams'
 import { LoadingSpinner } from './ui/LoadingSpinner'
 import { PageToolbarPropsType, SecondaryPageToolbarPropsType, TeamsTogglePropsType } from '../lib/types'
 import { PageToolbar, SecondaryPageToolbar, TeamsToggle } from './ui/PageNavBar'
@@ -12,7 +12,7 @@ import { DraftBoardDataType, DraftOrderDataType, useDraftBoardData } from '../ap
 import { Input } from './ui/input'
 import { cn } from '@/lib/utils'
 
-type LeagueOfficePagesType = 'Rulebook' | 'Free Agency' | 'Draft List' | 'Draft Board' | 'History' | 'Trade Block'
+type LeagueOfficePagesType = 'Rulebook' | 'Free Agency' | 'Draft List' | 'Draft Board' | 'History' | 'Trade Block' | 'GM Rankings'
 type NHLPositions = 'Any' | 'Fwd' | 'C' | 'Wing' | 'LW' | 'RW' | 'D' | 'GK' | 'G' | 'A' | 'P' | 'PPP' | 'SOG' | 'HIT' | 'BLK' | 'W' | 'GAA' | 'SVP'
 
 export default function LeagueOffice() {
@@ -40,6 +40,7 @@ export default function LeagueOffice() {
 			{ key: 'pgType', value: 'Free Agency' },
 			{ key: 'pgType', value: 'Draft Board' },
 			{ key: 'pgType', value: 'Draft List' },
+			{ key: 'pgType', value: 'GM Rankings' },
 			// { key: 'pgType', value: 'History' },
 			// { key: 'pgType', value: 'Trade Block' },
 		],
@@ -97,6 +98,12 @@ export default function LeagueOffice() {
 					<SecondaryPageToolbar {...pageToolbarProps} />
 					<PageToolbar {...draftBoardToolbarProps} />
 					<DraftList {...{ position, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
+				</>
+			)}
+			{leagueOfficePage === 'GM Rankings' && (
+				<>
+					<PageToolbar {...pageToolbarProps} />
+					<GMRankings />
 				</>
 			)}
 			{/* {leagueOfficePage === 'Trade Block' && <TradeBlock {...{ searchParams, setSearchParams }} />} */}
@@ -843,4 +850,26 @@ function DraftBoard({
 			</>
 		)
 	}
+}
+
+function GMRankings() {
+	const rankingData = useGMRankings({})
+	console.log(rankingData)
+	if (rankingData.loading) return <LoadingSpinner />
+	if (rankingData.error) return <div>{rankingData.error.toString()}</div>
+	return (
+		<div>
+			<div>GM Rankings</div>
+			{rankingData.data?.map(owner => {
+				return (
+					<>
+						<div>{owner.Nickname}</div>
+						<div>
+							{owner.W + owner.HW}-{owner.L + owner.HL}
+						</div>
+					</>
+				)
+			})}
+		</div>
+	)
 }

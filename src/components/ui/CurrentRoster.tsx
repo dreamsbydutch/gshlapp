@@ -6,12 +6,13 @@ import { moneyFormatter } from '../../lib/utils'
 import { LoadingSpinner } from './LoadingSpinner'
 
 export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoType; season: SeasonInfoDataType }) {
-	const showSalaries = true
+	const showSalaries = false
 	const salaryData = useSalaryData({}).data
 	const rosterData = useCurrentRoster({ season: season.Season, gshlTeam: teamInfo.id })
 	const contractData = useContractData({ teamID: teamInfo.id })
 	const expiringContracts = contractData.data?.filter(obj => +obj.YearsRemaining === 0)
 	const currentRoster = rosterData.data?.sort((a, b) => a.Rank - b.Rank)
+	console.log(currentRoster)
 	const teamLineup = !currentRoster?.filter(obj => obj.LineupPos === 'Util')[0]?.nhlPos.includes('D')
 		? [
 				[
@@ -87,13 +88,13 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 													</div>
 													<div
 														className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${
-															a?.Rank < 17
+															a?.Rank < 15
 																? 'bg-emerald-400'
-																: a?.Rank < 65
+																: a?.Rank < 57
 																? 'bg-emerald-200'
-																: a?.Rank < 161
+																: a?.Rank < 141
 																? 'bg-yellow-200'
-																: a?.Rank < 241
+																: a?.Rank < 211
 																? 'bg-orange-200'
 																: 'bg-rose-200'
 														}`}>
@@ -137,13 +138,13 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 										</div>
 										<div
 											className={`text-2xs rounded-lg px-2 max-w-fit place-self-center ${
-												obj?.Rank < 17
+												obj?.Rank < 15
 													? 'bg-emerald-400'
-													: obj?.Rank < 65
+													: obj?.Rank < 57
 													? 'bg-emerald-200'
-													: obj?.Rank < 161
+													: obj?.Rank < 141
 													? 'bg-yellow-200'
-													: obj?.Rank < 241
+													: obj?.Rank < 211
 													? 'bg-orange-200'
 													: 'bg-rose-200'
 											}`}>
@@ -162,11 +163,11 @@ export default function TeamRoster({ teamInfo, season }: { teamInfo: TeamInfoTyp
 				</div>
 			) : null}
 			<div className="my-2 flex gap-2 justify-center">
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-400">1 - 16</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-200">17 - 64</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-yellow-200">65 - 160</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-orange-200">161 - 240</div>
-				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-rose-200">241 +</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-400">1 - 14</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-emerald-200">15 - 56</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-yellow-200">57 - 140</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-orange-200">141 - 210</div>
+				<div className="text-3xs rounded-lg px-2 max-w-fit place-self-center bg-rose-200">211 +</div>
 			</div>
 			{showSalaries && (
 				<div className="text-center mx-auto text-lg font-medum pb-4">

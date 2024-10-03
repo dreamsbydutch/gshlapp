@@ -87,11 +87,11 @@ export function getNumberInWrittenForm(num: number) {
 
 	const thousands = ['', 'thousand', 'million', 'billion']
 
-	function helperFunc(n: number) {
+	function helperFunc(n: number): string {
 		if (n === 0) return ''
 		if (n < 20) return belowTwenty[n - 1] + ' '
 		if (n < 100) return tens[Math.floor(n / 10) - 2] + (n % 10 ? '-' + belowTwenty[(n % 10) - 1] : '') + ' '
-		if (n < 1000) return belowTwenty[Math.floor(n / 100) - 1] + ' hundred ' + (n % 100 ? helper(n % 100) : '')
+		if (n < 1000) return belowTwenty[Math.floor(n / 100) - 1] + ' hundred ' + (n % 100 ? helperFunc(n % 100) : '')
 		return ''
 	}
 
@@ -113,9 +113,10 @@ export function getNumberInWrittenForm(num: number) {
 export function getSeason(season?: number) {
 	const date = new Date()
 	date.setHours(date.getHours() - 8)
+	date.setMonth(date.getMonth() + 6)
 	return season
 		? seasons.filter(obj => String(obj.Season) === String(season))[0]
-		: seasons.filter(season => season.SeasonStartDate < date).slice(-1)[0]
+		: seasons.filter(season => season.SeasonStartDate <= date).slice(-1)[0]
 }
 export function seasonToNumber(season?: SeasonInfoDataType) {
 	const date = new Date()

@@ -342,8 +342,12 @@ function PlayerContractTable({ contracts, team }: { contracts: PlayerContractTyp
 }
 function TeamDraftPicks({ teamInfo }: { teamInfo: TeamInfoType }) {
 	const gshlTeams = useGSHLTeams({}).data
+	const currDate = new Date()
 	const draftPickData: TeamDraftPickType[] = useAllFutureDraftPicks(teamInfo || undefined)
-	const currentTeamContracts = useContractData({ date: new Date(), teamID: teamInfo?.id })
+	const currentTeamContracts = useContractData({
+		date: new Date(currDate.getFullYear() + 1, currDate.getMonth(), currDate.getDay()),
+		teamID: teamInfo?.id,
+	})
 		.data?.filter(obj => +obj.YearsRemaining >= 0 && obj.ExpiryType !== 'Buyout')
 		.sort((a, b) => b.CapHit - a.CapHit)
 	const numberSuffix = (num: number) => {
@@ -1160,7 +1164,7 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 				})}
 			</div>
 			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
-				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-full py-4">
 					{awardSorted[0]
 						.sort((a, b) => b.Season - a.Season)
 						.map(obj => (
@@ -1170,7 +1174,7 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 			</div>
 			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
 				<div className="text-xs text-slate-400 font-oswald">Team Trophies</div>
-				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-full py-4">
 					{awardSorted
 						.slice(1, 5)
 						.flat()
@@ -1182,7 +1186,7 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 			</div>
 			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
 				<div className="text-xs text-slate-400 font-oswald">Tier 1 Awards</div>
-				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-full py-4">
 					{awardSorted
 						.slice(5, 8)
 						.flat()
@@ -1194,7 +1198,7 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 			</div>
 			<div className="flex flex-col flex-wrap items-center justify-center border-b-2 border-dotted border-slate-400 w-5/6 py-2">
 				<div className="text-xs text-slate-400 font-oswald">Tier 2 Awards</div>
-				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-full py-4">
 					{awardSorted
 						.slice(8)
 						.flat()
@@ -1206,7 +1210,7 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 			</div>
 			<div className="flex flex-col flex-wrap items-center justify-center w-5/6 py-2">
 				<div className="text-xs text-slate-400 font-oswald">All-Stars</div>
-				<div className="flex flex-row flex-wrap items-center gap-2 justify-center w-5/6 py-4">
+				<div className="flex flex-row flex-wrap items-center gap-4 justify-center w-full py-4">
 					{allStarTotals.map((tier, i) => {
 						return tier[0]
 							.sort((a, b) => b.Season - a.Season)
@@ -1246,14 +1250,14 @@ function TeamTrophyCase({ teamInfo }: { teamInfo: TeamInfoType }) {
 	)
 }
 function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; season: Season; teamStats: TeamAwardType }) {
-	const teamInfo = useGSHLTeams({ teamID: teamStats.gshlTeam }).data
+	const teamInfo = useGSHLTeams({ teamID: teamStats.gshlTeam[0] }).data
 	if (!teamInfo) return <></>
 	switch (trophyID) {
 		case 'Cup':
 			return (
-				<div className="flex flex-col w-28 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/qqvph7Y4/gshlCup.jpg')]">
-						<img className="w-full mx-auto pt-20 pb-8 px-8" src={teamInfo[0].LogoURL} />
+						<img className="w-full mx-auto pt-20 pb-8 px-6" src={teamInfo[0].LogoURL} />
 					</div>
 					<div className="font-oswald text-xl font-bold">{season}</div>
 					<div className="font-oswald">GSHL Cup</div>
@@ -1262,7 +1266,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'President':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/1XDpbZwq/presidents-trophy.png')]">
 						<img className="w-full mx-auto pt-16 pb-6 pl-5 pr-4" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1273,7 +1277,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'TwoSevenSix':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/PJZ3bg7J/276.png')]">
 						<img className="w-full mx-auto pt-16 pb-6 px-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1284,7 +1288,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'UnitFour':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/wMh2Rhts/unit4.jpg')]">
 						<img className="w-full mx-auto pt-16 pb-6 px-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1295,9 +1299,9 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'Loser':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/vHbvVcWF/losers.jpg')]">
-						<img className="w-full mx-auto pt-5 pb-16 px-7" src={teamInfo[0].LogoURL} />
+						<img className="w-full mx-auto pt-5 pb-16 px-6" src={teamInfo[0].LogoURL} />
 					</div>
 					<div className="font-oswald text-xl font-bold">{season}</div>
 					<div className="font-oswald text-sm">Adam Brophy Trophy</div>
@@ -1306,7 +1310,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'Hart':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/Yqht1cJp/Hart.jpg')]">
 						<img className="w-full mx-auto pt-20 pb-2 px-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1317,7 +1321,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'GMOY':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gJH93py2/gmofyear.jpg')]">
 						<img className="w-full mx-auto pt-16 pb-7 pr-7 pl-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1328,7 +1332,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'JackAdams':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/QCdQSg7W/Jack-Adams.jpg')]">
 						<img className="w-full mx-auto pt-16 pb-2 px-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1339,7 +1343,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'Calder':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/k5nSMXpJ/calder.jpg')]">
 						<img className="w-full mx-auto pt-16 pb-5 px-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1350,7 +1354,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'Norris':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/Y0SMnT0z/norris.jpg')]">
 						<img className="w-full mx-auto pt-14 pb-2 px-5" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1361,7 +1365,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'Vezina':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/DZ67c7vz/vezina.jpg')]">
 						<img className="w-full mx-auto pt-16 pb-4 pl-7 pr-5" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1372,7 +1376,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'ArtRoss':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gcMYXctS/Art-Ross.jpg')]">
 						<img className="w-full mx-auto pt-12 pb-4 px-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1383,7 +1387,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'Rocket':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/NFP9p6sL/Rocket-Richard.jpg')]">
 						<img className="w-full mx-auto pt-12 pb-3 pl-7 pr-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1394,7 +1398,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'Selke':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/vH4N00PL/selke.jpg')]">
 						<img className="w-full mx-auto pt-12 pb-4 px-6" src={teamInfo[0].LogoURL} />
 					</div>
@@ -1405,7 +1409,7 @@ function TrophyDisplay({ trophyID, season, teamStats }: { trophyID: string; seas
 			break
 		case 'LadyByng':
 			return (
-				<div className="flex flex-col w-20 my-auto">
+				<div className="flex flex-col w-20 sm:w-24 lg:w-26 my-auto">
 					<div className="bg-center bg-contain bg-no-repeat bg-[url('https://i.postimg.cc/gk1BQ3Q9/lady-byng.png')]">
 						<img className="w-full mx-auto pt-16 pb-3 px-7" src={teamInfo[0].LogoURL} />
 					</div>

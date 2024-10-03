@@ -1,4 +1,4 @@
-import { SeasonInfoDataType } from "../api/types"
+import { SeasonInfoDataType } from '../api/types'
 
 export const seasons: Array<SeasonInfoDataType> = [
 	{
@@ -123,30 +123,6 @@ export const seasons: Array<SeasonInfoDataType> = [
 	},
 ]
 export const upcomingSeasons: Array<SeasonInfoDataType> = [
-	{
-		Season: 2025,
-		ListName: '2024-25',
-		CurrentNHLGamesPlayed: 82,
-		SeasonStartDate: new Date('2024-10-11T00:00:00'),
-		SeasonEndDate: new Date('2025-03-19T00:00:00'),
-		SeasonDays: 160,
-		SeasonLength: 22,
-		PlayoffStartDate: new Date('2025-03-20T00:00:00'),
-		PlayoffEndDate: new Date('2025-04-14T00:00:00'),
-		PlayoffDays: 26,
-		EarlySigningStartDate: new Date('2024-12-15T00:00:00'),
-		EarlySigningEndDate: new Date('2024-12-31T00:00:00'),
-		LateSigningStartDate: new Date('2025-04-15T00:00:00'),
-		LateSigningEndDate: new Date('2025-06-10T00:00:00'),
-		Positions: [
-			['C', 'LW', 'RW', 'D', 'G', 'Util', 'BN', 'IR+', 'IR'],
-			[2, 2, 2, 3, 1, 1, 4, 1, 1],
-		],
-		Categories: ['G', 'A', 'P', 'PPP', 'SOG', 'HIT', 'BLK', 'W', 'GAA', 'SVP'],
-		PlayerData: '',
-		TeamData: '',
-		SalaryCap: 25000000,
-	},
 	{
 		Season: 2026,
 		ListName: '2025-26',

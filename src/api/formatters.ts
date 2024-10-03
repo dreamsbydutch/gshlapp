@@ -113,9 +113,6 @@ export function formatCurrentRoster(player: { [key: string]: number | string | s
 	player.gshlTeam = String(player.gshlTeam)
 		.split(',')
 		.map(obj => +obj)
-	player.owner = String(player.owner)
-		.split(',')
-		.map(obj => +obj)
 	player = formatNumbersInsideInputs(player)
 	return player
 }

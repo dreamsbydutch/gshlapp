@@ -31,6 +31,7 @@ type InputOptions =
 	| 'Rulebook'
 	| 'Awards'
 	| 'AllStars'
+	| 'GMRankings'
 	| 'Headlines'
 	| 'DraftBoard'
 	| 'LiveDraftOrder'
@@ -92,6 +93,7 @@ export async function queryFunc({ queryKey }: { queryKey: string[] }) {
 			case 'Rulebook':
 			case 'Awards':
 			case 'AllStars':
+			case 'GMRankings':
 			case 'Headlines':
 			case 'DraftBoard':
 			case 'LiveDraftOrder':
