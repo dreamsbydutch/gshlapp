@@ -86,26 +86,26 @@ export default function LeagueOffice() {
 					<PlayerSalaries />
 				</>
 			)}
-			{leagueOfficePage === 'Draft Board' && (
+			{/* {leagueOfficePage === 'Draft Board' && (
 				<>
 					<SecondaryPageToolbar {...pageToolbarProps} />
 					<TeamsToggle {...teamsToggleProps} />
 					<DraftBoard {...{ searchParams, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
 				</>
-			)}
-			{leagueOfficePage === 'Draft List' && (
+			)} */}
+			{/* {leagueOfficePage === 'Draft List' && (
 				<>
 					<SecondaryPageToolbar {...pageToolbarProps} />
 					<PageToolbar {...draftBoardToolbarProps} />
 					<DraftList {...{ position, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
 				</>
-			)}
-			{leagueOfficePage === 'GM Rankings' && (
+			)} */}
+			{/* {leagueOfficePage === 'GM Rankings' && (
 				<>
 					<PageToolbar {...pageToolbarProps} />
 					<GMRankings />
 				</>
-			)}
+			)} */}
 			{/* {leagueOfficePage === 'Trade Block' && <TradeBlock {...{ searchParams, setSearchParams }} />} */}
 		</div>
 	)
