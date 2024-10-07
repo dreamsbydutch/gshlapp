@@ -100,12 +100,12 @@ export default function LeagueOffice() {
 					<DraftList {...{ position, draftboard: data.draftboard, draftorder: data.draftorder, teamData: currentTeam }} />
 				</>
 			)} */}
-			{/* {leagueOfficePage === 'GM Rankings' && (
+			{leagueOfficePage === 'GM Rankings' && (
 				<>
 					<PageToolbar {...pageToolbarProps} />
 					<GMRankings />
 				</>
-			)} */}
+			)}
 			{/* {leagueOfficePage === 'Trade Block' && <TradeBlock {...{ searchParams, setSearchParams }} />} */}
 		</div>
 	)

@@ -81,12 +81,12 @@ const StandingsToggle = ({ standingsType, season }: { standingsType: StandingsOp
 			{
 				title: 'Wildcard',
 				classes: 'bg-gray-100 [&>*:nth-child(2)]:border-solid [&>*:nth-child(2)]:border-b-2 [&>*:nth-child(2)]:border-gray-800',
-				options: { season, WCRkMax: 6 },
+				options: { season, WCRkMax: 12 },
 			},
 			{
 				title: "Loser's Tournament",
 				classes: 'bg-brown-100',
-				options: { season, WCRkMin: 7 },
+				options: { season, WCRkMin: 13 },
 			},
 		],
 		Playoffs: [{ title: '', classes: 'bg-gray-100', options: { season } }],
@@ -159,19 +159,18 @@ export const StandingsItem = ({
 	} else if (standingsType === 'LosersTourney') {
 		const LTDiff = team.LTCF - team.LTCA
 		return (
-			<div
-				key={team.gshlTeam}
-				className="grid grid-cols-12 mx-auto py-1 font-varela text-center items-center border-b border-dotted border-gray-400"
-				onClick={() => setShowInfo(!showInfo)}>
-				<div className="col-span-2 p-1">
-					<img className="w-12" src={String(teamInfo && teamInfo[0]?.LogoURL)} alt="Team Logo" />
-				</div>
-				<div className="col-span-7 font-bold text-base">{teamInfo && teamInfo[0]?.TeamName}</div>
-				<div className="col-span-2 text-sm">
-					{team.LTW} - {team.LTL}
-				</div>
-				<div className={`col-span-1 text-sm ${LTDiff > 0 ? 'text-emerald-800' : LTDiff < 0 ? 'text-rose-800' : 'text-gray-500'}`}>
-					{LTDiff > 0 ? '+' + LTDiff : LTDiff < 0 ? LTDiff : '-'}
+			<div key={team.gshlTeam} className="border-b border-dotted border-gray-400" onClick={() => setShowInfo(!showInfo)}>
+				<div className="flex justify-between mx-auto px-2 py-0.5 font-varela text-center items-center">
+					<div className="p-1">
+						<img className="w-12" src={String(teamInfo && teamInfo[0]?.LogoURL)} alt="Team Logo" />
+					</div>
+					<div className="font-bold text-base">{teamInfo && teamInfo[0]?.TeamName}</div>
+					<div className="text-sm">
+						{team.LTW} - {team.LTL}
+					</div>
+					<div className={`col-span-1 text-sm ${LTDiff > 0 ? 'text-emerald-800' : LTDiff < 0 ? 'text-rose-800' : 'text-gray-500'}`}>
+						{LTDiff > 0 ? '+' + LTDiff : LTDiff < 0 ? LTDiff : '-'}
+					</div>
 				</div>
 				{showInfo ? (
 					<>
@@ -188,31 +187,30 @@ export const StandingsItem = ({
 		)
 	} else {
 		return (
-			<div
-				key={team.gshlTeam}
-				className="grid grid-cols-12 mx-auto py-1 font-varela text-center items-center border-b border-dotted border-gray-400"
-				onClick={() => setShowInfo(!showInfo)}>
-				<div className="col-span-2 p-1">
-					<img className="w-12" src={String(teamInfo && teamInfo[0]?.LogoURL)} alt="Team Logo" />
+			<div key={team.gshlTeam} className="border-b border-dotted border-gray-400" onClick={() => setShowInfo(!showInfo)}>
+				<div className="flex justify-between mx-auto px-2 py-0.5 font-varela text-center items-center">
+					<div className="p-1">
+						<img className="w-12" src={String(teamInfo && teamInfo[0]?.LogoURL)} alt="Team Logo" />
+					</div>
+					<div className="font-bold text-base">
+						{teamProb.OneSeed === 1
+							? 'z - '
+							: teamProb.OneConf === 1
+							? 'y - '
+							: teamProb.PlayoffsPer === 1
+							? 'x - '
+							: teamProb.LoserPer === 1
+							? 'l - '
+							: !teamProb.PlayoffsPer
+							? 'e - '
+							: ''}
+						{teamInfo && teamInfo[0]?.TeamName}
+					</div>
+					<div className="text-sm">
+						{team.W} - {team.L}
+					</div>
 				</div>
-				<div className="col-span-7 font-bold text-base">
-					{teamProb.OneSeed === 1
-						? 'z - '
-						: teamProb.OneConf === 1
-						? 'y - '
-						: teamProb.PlayoffsPer === 1
-						? 'x - '
-						: teamProb.LoserPer === 1
-						? 'l - '
-						: !teamProb.PlayoffsPer
-						? 'e - '
-						: ''}
-					{teamInfo && teamInfo[0]?.TeamName}
-				</div>
-				<div className="col-span-2 text-sm">
-					{team.W} - {team.L}
-				</div>
-				<div className={`text-xs ${team.Stk.includes('W') ? 'text-emerald-800' : 'text-rose-800'}`}>{team.Stk}</div>
+				{/* <div className={`text-xs ${team.Stk?.includes('W') ? 'text-emerald-800' : 'text-rose-800'}`}>{team.Stk}</div> */}
 				{showInfo ? (
 					<>
 						<div className="col-span-12 mb-0.5 flex flex-row justify-center flex-wrap">

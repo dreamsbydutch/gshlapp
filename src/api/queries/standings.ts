@@ -110,10 +110,14 @@ export function useStandingsData(options: StandingsQueryOptions) {
 		stdgData = stdgData.filter(obj => options.WCRkMin && obj.WCRk && +obj.WCRk >= options.WCRkMin)
 	}
 	if (options.LTRkMax) {
-		stdgData = stdgData.filter(obj => options.LTRkMax && obj.LTRk && +obj.LTRk <= options.LTRkMax)
+		stdgData = stdgData
+			.sort((a: StandingsInfoType, b: StandingsInfoType) => (a.LTRk ?? 5) - (b.LTRk ?? 5))
+			.filter(obj => options.LTRkMax && obj.LTRk && +obj.LTRk <= options.LTRkMax)
 	}
 	if (options.LTRkMin) {
-		stdgData = stdgData.filter(obj => options.LTRkMin && obj.LTRk && +obj.LTRk >= options.LTRkMin)
+		stdgData = stdgData
+			.sort((a: StandingsInfoType, b: StandingsInfoType) => (a.LTRk ?? 5) - (b.LTRk ?? 5))
+			.filter(obj => options.LTRkMin && obj.LTRk && +obj.LTRk >= options.LTRkMin)
 	}
 	if (options.POFinish) {
 		stdgData = stdgData.filter(obj => obj.POFinish === options.POFinish)

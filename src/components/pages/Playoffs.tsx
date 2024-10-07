@@ -4,7 +4,6 @@ import { useGSHLTeams } from '../../api/queries/teams'
 import { Season, SeasonInfoDataType } from '../../api/types'
 import { LoadingSpinner } from '../ui/LoadingSpinner'
 import { StandingsContainer } from '../Standings'
-import { useStandingsData } from '../../api/queries/standings'
 
 export const PlayoffBracket = ({ seasonID }: { seasonID: Season }) => {
 	const scheduleData = useScheduleData({ season: seasonID, gameType: 'PO' }).data
@@ -12,6 +11,7 @@ export const PlayoffBracket = ({ seasonID }: { seasonID: Season }) => {
 		return <LoadingSpinner />
 	}
 	if (!scheduleData[0].HomeTeam) return <></>
+	console.log(scheduleData)
 	return (
 		<div className="flex flex-nowrap overflow-scroll whitespace-nowrap py-3 rounded-xl shadow-md gap-2 bg-gradient-to-b from-sunview-50 to-hotel-50 bg-opacity-10">
 			<div className="flex flex-col gap-2 [&>*]:bg-orange-200 [&>*]:bg-opacity-50">
@@ -44,7 +44,6 @@ const BracketLine = ({ matchup }: { matchup: MatchupDataType }) => {
 	if (!matchup) return <></>
 	const homeTeam = gshlTeams?.filter(obj => obj.id === matchup.HomeTeam)[0]
 	const awayTeam = gshlTeams?.filter(obj => obj.id === matchup.AwayTeam)[0]
-	console.log(matchup)
 	if (!homeTeam && !awayTeam) {
 		return (
 			<div className="flex flex-col m-2 px-2 py-4 text-gray-600 font-bold items-center bg-gray-100 shadow-emboss rounded-2xl shrink-0 min-w-max">
