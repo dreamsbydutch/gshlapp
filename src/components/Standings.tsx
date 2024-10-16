@@ -81,12 +81,7 @@ const StandingsToggle = ({ standingsType, season }: { standingsType: StandingsOp
 			{
 				title: 'Wildcard',
 				classes: 'bg-gray-100 [&>*:nth-child(2)]:border-solid [&>*:nth-child(2)]:border-b-2 [&>*:nth-child(2)]:border-gray-800',
-				options: { season, WCRkMax: 12 },
-			},
-			{
-				title: "Loser's Tournament",
-				classes: 'bg-brown-100',
-				options: { season, WCRkMin: 13 },
+				options: { season, WCRkMax: 14 },
 			},
 		],
 		Playoffs: [{ title: '', classes: 'bg-gray-100', options: { season } }],
