@@ -207,9 +207,9 @@ function RankingItemData({
 						? 'bg-emerald-400'
 						: weeklyRk < 7
 						? 'bg-emerald-200'
-						: weeklyRk < 11
+						: weeklyRk < 9
 						? 'bg-yellow-200'
-						: weeklyRk < 14
+						: weeklyRk < 12
 						? 'bg-orange-200'
 						: 'bg-rose-200'
 				}`}>
@@ -224,9 +224,9 @@ function RankingItemData({
 						? 'bg-emerald-400'
 						: seasonRk < 7
 						? 'bg-emerald-200'
-						: seasonRk < 11
+						: seasonRk < 9
 						? 'bg-yellow-200'
-						: seasonRk < 14
+						: seasonRk < 12
 						? 'bg-orange-200'
 						: 'bg-rose-200'
 				}`}>
