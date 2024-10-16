@@ -405,7 +405,6 @@ export function usePlayerDays(options: PlayerDayOptions) {
 	if (options.WeekNum) {
 		daysData = daysData.filter(obj => options.WeekNum === obj.WeekNum)
 	}
-	console.log(daysData)
 	return { data: daysData }
 }
 
