@@ -159,7 +159,7 @@ function RankingItem({ teamStdgInfo }: { teamStdgInfo: StandingsInfoType }) {
 				</div>
 			</li>
 			{showInfo ? (
-				<div className="grid grid-cols-12 gap-0.5 font-varela text-2xs xs:text-xs pb-2 text-center mx-auto overflow-x-scroll">
+				<div className="flex flex-row gap-0.5 font-varela text-2xs xs:text-xs pb-2 text-center mx-auto overflow-x-scroll">
 					<div className="flex flex-col mx-auto gap-8 px-1 pt-8">
 						<div className="mx-auto">Last Wk</div>
 						<div className="mx-auto">Season</div>
