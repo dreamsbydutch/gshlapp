@@ -186,8 +186,9 @@ function RankingItemData({
 	weeklyData: TeamWeekType[]
 	seasonData: TeamSeasonType[]
 }) {
-	const weeklyTeamData = weeklyData.filter(obj => obj.gshlTeam === team)[0]
-	const seasonTeamData = seasonData.filter(obj => obj.gshlTeam === team)[0]
+	const weeklyTeamData = weeklyData.filter(obj => obj.gshlTeam[0] === team)[0]
+	const seasonTeamData = seasonData.filter(obj => obj.gshlTeam[0] === team)[0]
+	console.log(weeklyData)
 	const weeklyRk =
 		category === 'GAA' || category === 'MS'
 			? weeklyData.filter(obj => obj[category] < weeklyTeamData[category]).length + 1
